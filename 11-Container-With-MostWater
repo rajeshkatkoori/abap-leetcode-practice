@@ -1,0 +1,26 @@
+TYPES: tt_input TYPE TABLE OF i WITH EMPTY KEY.
+
+DATA(lt_height) = VALUE tt_input( ( 1 ) ( 8 ) ( 6 ) ( 2 ) ( 5 ) ( 4 ) ( 8 ) ( 3 ) ( 7 ) ).
+
+*lt_height  = VALUE tt_input( ( 1 ) ( 1 ) ).
+
+DATA(lv_start) = 1.
+DATA(lv_end) = lines( lt_height ).
+DATA(area) = 0.
+WHILE lv_start < lv_end .
+
+  DATA(min) = nmin( val1 = lt_height[ lv_start ] val2 = lt_height[ lv_end ] ).
+  DATA(diff) = lv_end - lv_start.
+  area = nmax( val1 = area val2 = min * diff ).
+
+
+  IF lt_height[ lv_start ] < lt_height[ lv_end ].
+    lv_start = lv_start + 1.
+  ELSE.
+    lv_end = lv_end - 1.
+  ENDIF.
+
+ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = area name = '11. Container With Most Water' ).

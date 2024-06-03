@@ -28,7 +28,7 @@
         lv_end -= 1.
       ENDWHILE.
 
-      IF lv_input+lv_start(1) = lv_input+lv_end(1) AND lv_end > lv_start.
+      IF lv_input+lv_start(1) = lv_input+lv_end(1).
         lv_start += 1.
         lv_end -= 1.
       ELSE.

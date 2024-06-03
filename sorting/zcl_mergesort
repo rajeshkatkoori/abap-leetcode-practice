@@ -1,0 +1,116 @@
+CLASS zcl_mergesort DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS mergesort
+      IMPORTING
+        !iv_table       TYPE abadr_tab_int4
+      RETURNING
+        VALUE(rv_table) TYPE abadr_tab_int4 .
+    CLASS-METHODS call_merge_sort
+      IMPORTING
+        !iv_table       TYPE abadr_tab_int4
+      RETURNING
+        VALUE(rv_table) TYPE abadr_tab_int4 .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    CLASS-METHODS merge
+      CHANGING
+        !cv_left         TYPE abadr_tab_int4
+        !cv_right        TYPE abadr_tab_int4
+      RETURNING
+        VALUE(rv_merged) TYPE abadr_tab_int4 .
+ENDCLASS.
+
+
+CLASS zcl_mergesort IMPLEMENTATION.
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_MERGESORT=>call_merge_sort
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_TABLE                       TYPE        ABADR_TAB_INT4
+* | [<-()] RV_TABLE                       TYPE        ABADR_TAB_INT4
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD call_merge_sort .
+
+    IF lines( iv_table ) <= 1.
+      rv_table = iv_table.
+      RETURN.
+    ENDIF.
+
+    rv_table = mergesort( iv_table ).
+
+  ENDMETHOD.
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method ZCL_MERGESORT=>mergesort
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_TABLE                       TYPE        ABADR_TAB_INT4
+* | [<-()] RV_TABLE                       TYPE        ABADR_TAB_INT4
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD mergesort.
+
+    DATA: lt_left  TYPE STANDARD TABLE OF i,
+          lt_right TYPE STANDARD TABLE OF i.
+
+    IF lines( iv_table ) = 1.
+      rv_table = iv_table.
+      RETURN.
+    ENDIF.
+
+*...//Split the table into half, left and Right
+    DATA(mid) = lines( iv_table ) DIV 2.
+    INSERT LINES OF iv_table FROM 1 TO mid INTO TABLE lt_left.
+    INSERT LINES OF iv_table FROM ( mid + 1 )  INTO TABLE lt_right.
+
+*...//Do Sorting for Left and Right Lists
+    DATA(lv_left_sorted) = mergesort( lt_left ).
+    DATA(lv_right_sorted) = mergesort( lt_right ).
+
+    rv_table = merge( CHANGING cv_left  = lv_left_sorted
+                               cv_right = lv_right_sorted ).
+
+  ENDMETHOD.
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Private Method ZCL_MERGESORT=>MERGE
+* +-------------------------------------------------------------------------------------------------+
+* | [<-->] CV_LEFT                        TYPE        ABADR_TAB_INT4
+* | [<-->] CV_RIGHT                       TYPE        ABADR_TAB_INT4
+* | [<-()] RV_MERGED                      TYPE        ABADR_TAB_INT4
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD merge.
+
+    DATA: i TYPE i VALUE 1,
+          j TYPE i VALUE 1.
+
+    DATA(ll) = lines( cv_left ).
+    DATA(rl) = lines( cv_right ).
+
+    WHILE i  LE ll AND j LE rl.
+
+      IF cv_left[ i ] > cv_right[ j ].
+        APPEND cv_right[ j ] TO rv_merged.
+        j = j + 1.
+      ELSE.
+        APPEND cv_left[ i ] TO rv_merged.
+        i = i + 1.
+      ENDIF.
+    ENDWHILE.
+
+    INSERT LINES OF cv_left FROM i INTO TABLE rv_merged.
+
+    INSERT LINES OF cv_right FROM j INTO TABLE rv_merged.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  DATA(lt_list) = VALUE abadr_tab_int4( ( 15 ) ( 2 ) ( 10 )  ( 1 ) ( 5 ) ( 3 ) ( 8 ) ( 4 ) ( 2 ) ( 13 ) ).
+  lt_list = zcl_mergesort=>call_merge_sort( lt_list ).
+*...//Display the Output
+  cl_demo_output=>display( data = lt_list name = 'Merge Sort' ).

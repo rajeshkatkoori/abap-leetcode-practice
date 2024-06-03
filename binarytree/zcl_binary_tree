@@ -1,0 +1,145 @@
+CLASS zcl_binary_tree DEFINITION FINAL.
+
+  PUBLIC SECTION.
+
+    TYPES: BEGIN OF ty_binarytree,
+             value TYPE i,
+             left  TYPE REF TO data,
+             right TYPE REF TO data,
+           END OF ty_binarytree.
+
+    CLASS-METHODS:
+      main,
+      build_btree
+        IMPORTING
+                  !iv_num   TYPE int4
+        CHANGING  !cv_btree TYPE ty_binarytree,
+      print_inorder IMPORTING !iv_btree TYPE ty_binarytree,
+      print_preorder IMPORTING !iv_btree TYPE ty_binarytree,
+      print_postorder IMPORTING !iv_btree TYPE ty_binarytree.
+
+ENDCLASS.
+
+
+CLASS zcl_binary_tree IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*   Method main                                                        *
+*----------------------------------------------------------------------*
+  METHOD main .
+
+    TYPES: tt_nums TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+    DATA: btree TYPE ty_binarytree.
+
+    DATA(lt_nums) = VALUE tt_nums( ( 2 ) ( 1 ) ( 3 ) ).
+
+*....//Insert the records to a Binary tree
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+      build_btree( EXPORTING iv_num = <lfs_num>  CHANGING cv_btree = btree ).
+    ENDLOOP.
+*    BREAK-POINT.
+*..//Print values from Binary Tree using Inorder Traversal
+    WRITE:/ 'In-Order Traversal  '.
+    print_inorder( btree ).
+
+*..//Print values from Binary Tree using Pre-order Traversal
+    WRITE:/ 'Pre-Order Traversal '.
+    print_preorder( btree ).
+
+*..//Print values from Binary Tree using Post-order Traversal
+    WRITE:/ 'Post-Order Traversal'.
+    print_postorder( btree ).
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*   Method build_btree                                                      *
+*   Inserts a value to the Binary Tree
+*----------------------------------------------------------------------*
+  METHOD build_btree.
+
+    FIELD-SYMBOLS <lfs_btree> TYPE ty_binarytree.
+
+    IF cv_btree IS INITIAL.
+
+      cv_btree-value = iv_num.
+      CREATE DATA cv_btree-left TYPE ty_binarytree.
+      CREATE DATA cv_btree-right TYPE ty_binarytree.
+
+    ELSE.
+
+      IF iv_num < cv_btree-value.
+
+        ASSIGN cv_btree-left->* TO <lfs_btree>.
+        build_btree( EXPORTING iv_num = iv_num  CHANGING cv_btree = <lfs_btree> ).
+
+      ELSE.
+
+        ASSIGN cv_btree-right->* TO <lfs_btree>.
+        build_btree( EXPORTING iv_num = iv_num  CHANGING cv_btree = <lfs_btree> ).
+
+      ENDIF.
+
+    ENDIF.
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*   Method print_inorder                                               *
+*   Print values from Binary Tree using Inorder Traversal ( L - N - R )*
+*   Values in Sorted Ascending Order
+*----------------------------------------------------------------------*
+  METHOD print_inorder.
+
+    FIELD-SYMBOLS <btree> TYPE any.
+
+    IF iv_btree IS NOT INITIAL.
+*...Left Node
+      ASSIGN iv_btree-left->* TO <btree>.
+      print_inorder( <btree> ).
+*...Root Node
+      WRITE: / iv_btree-value.
+*...Right Node
+      ASSIGN iv_btree-right->* TO <btree>.
+      print_inorder( <btree> ).
+    ENDIF.
+
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*   Method print_preorder                                              *
+*   Print values from Binary Tree using Preorder Traversal( N - L - R )*
+*----------------------------------------------------------------------*
+  METHOD print_preorder.
+
+    FIELD-SYMBOLS <btree> TYPE any.
+    IF iv_btree IS NOT INITIAL.
+*...Root Node
+      WRITE: / iv_btree-value.
+*...Left Node
+      ASSIGN iv_btree-left->* TO <btree>.
+      print_preorder( <btree> ).
+*...Right Node
+      ASSIGN iv_btree-right->* TO <btree>.
+      print_preorder( <btree> ).
+    ENDIF.
+
+  ENDMETHOD.
+
+*----------------------------------------------------------------------*
+*  Method print_postorder                                              *
+*  Print values from Binary Tree using Postorder Traversal( L - R - N )*
+*----------------------------------------------------------------------*
+  METHOD print_postorder.
+
+    FIELD-SYMBOLS <btree> TYPE any.
+    IF iv_btree IS NOT INITIAL.
+*...Left Node
+      ASSIGN iv_btree-left->* TO <btree>.
+      print_postorder( <btree> ).
+*...Right Node
+      ASSIGN iv_btree-right->* TO <btree>.
+      print_postorder( <btree> ).
+*...Root Node
+      WRITE: / iv_btree-value.
+    ENDIF.
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  zcl_binary_tree=>main( ).

@@ -1,0 +1,119 @@
+CLASS zcl_lpalindrome DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    CLASS-METHODS: longest_palindrome_hashtbl,
+                   longest_palindrome_hashset.
+
+ENDCLASS.
+
+
+CLASS zcl_lpalindrome IMPLEMENTATION.
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Private Method Longest_Palindrome
+* +-------------------------------------------------------------------------------------------------+
+*. Approach 2: Greedy Way (Hash Set)
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD longest_palindrome_hashset.
+    TYPES: BEGIN OF yt_hashset,
+             character TYPE char1,
+           END OF yt_hashset,
+           tt_hset TYPE STANDARD TABLE OF yt_hashset WITH EMPTY KEY.
+
+    DATA: hashset  TYPE tt_hset,
+          result   TYPE i,
+          lv_input TYPE string.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_input ).
+    cl_demo_input=>request( ).
+
+    DATA(len) = strlen( lv_input ).
+*...//Approach 1: Greedy Way (Hash Table)
+    DO len TIMES.
+      DATA(i) = sy-index - 1.
+      DATA(char) = lv_input+i(1).
+
+*...//Build the Char Freq Table
+      READ TABLE hashset ASSIGNING FIELD-SYMBOL(<lfs_hset>) WITH KEY character = char.
+      IF sy-subrc <> 0.
+        APPEND VALUE #( character = char ) TO hashset.
+      ELSE.
+        DELETE hashset WHERE character = char.
+        result += 2.
+      ENDIF.
+    ENDDO.
+
+    IF NOT hashset IS INITIAL.
+      result += 1.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = 'Length of Longest Palidrome using Hashset' ).
+  ENDMETHOD.
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Private Method Longest_Palindrome
+* +-------------------------------------------------------------------------------------------------+
+*. Approach 1: Greedy Way (Hash Table) -> Optimized
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD longest_palindrome_hashtbl.
+
+    TYPES: BEGIN OF yt_hashmap,
+             character TYPE char1,
+             frequency TYPE i,
+           END OF yt_hashmap,
+           tt_hmap TYPE STANDARD TABLE OF yt_hashmap WITH EMPTY KEY.
+
+    DATA: frequencymap      TYPE tt_hmap,
+          oddfreqcharscount TYPE i,
+          result            TYPE i,
+          lv_input          TYPE string.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_input ).
+    cl_demo_input=>request( ).
+
+    DATA(len) = strlen( lv_input ).
+
+*...//Approach 1: Greedy Way (Hash Table)
+    DO len TIMES.
+      DATA(i) = sy-index - 1.
+      DATA(char) = lv_input+i(1).
+*...//Build the Char Freq Table
+      READ TABLE frequencymap ASSIGNING FIELD-SYMBOL(<lfs_freq>) WITH KEY character = char.
+      IF sy-subrc <> 0.
+        APPEND VALUE #( character = char frequency = 1 ) TO  frequencymap.
+        oddfreqcharscount += 1.
+      ELSE.
+*...//Frequnecy of Odd Count Chars
+        <lfs_freq>-frequency += 1.
+        IF ( <lfs_freq>-frequency MOD 2 ) = 0.
+          oddfreqcharscount -= 1.
+        ELSE.
+          oddfreqcharscount += 1.
+        ENDIF.
+      ENDIF.
+    ENDDO.
+
+*..//Result: Length of Longest Palidrome
+    IF len = 1.
+      result = 1.
+    ELSE.
+      result = len.
+      IF oddfreqcharscount > 0.
+        result -= 1.
+      ENDIF.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = 'Length of Longest Palidrome using Hash Table' ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+
+  zcl_lpalindrome=>longest_palindrome_hashtbl( ).
+  zcl_lpalindrome=>longest_palindrome_hashset( ).

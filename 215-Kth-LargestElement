@@ -1,0 +1,164 @@
+CLASS zcl_kthlargest DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS:
+      kth_largest_element_sort
+        IMPORTING
+          !iv_table        TYPE abadr_tab_int4
+        RETURNING
+          VALUE(rv_result) TYPE i,
+      kth_largest_element_heap
+        IMPORTING
+          !iv_table        TYPE abadr_tab_int4
+        RETURNING
+          VALUE(rv_result) TYPE abadr_tab_int4 .
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+    CLASS-METHODS:
+      heapify
+        IMPORTING
+          !iv_current TYPE int4
+          !iv_len     TYPE int4
+          !iv_minheap TYPE boolean
+        CHANGING
+          !cv_table   TYPE abadr_tab_int4 .
+ENDCLASS.
+
+
+
+CLASS zcl_kthlargest IMPLEMENTATION.
+
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Private Method ZCL_HEAPSORT=>HEAPIFY
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_CURRENT                     TYPE        INT4
+* | [--->] IV_LEN                         TYPE        INT4
+* | [<-->] CV_TABLE                       TYPE        ABADR_TAB_INT4
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD heapify.
+
+    DATA(left) = 2 * iv_current.
+    DATA(right) = 2 * iv_current + 1.
+    DATA(largest) = iv_current.
+
+*....//Max Heap -> To get Ascending Order while Pop
+    IF iv_minheap IS INITIAL.
+      IF left <= iv_len AND cv_table[ left ] > cv_table[ largest ].
+        largest = left.
+      ENDIF.
+
+      IF right <= iv_len AND cv_table[ right ] > cv_table[ largest ].
+        largest = right.
+      ENDIF.
+
+    ELSE.
+*....//Min Heap -> To get Descending Order while Pop
+      IF left <= iv_len AND cv_table[ left ] < cv_table[ largest ].
+        largest = left.
+      ENDIF.
+
+      IF right <= iv_len AND cv_table[ right ] < cv_table[ largest ].
+        largest = right.
+      ENDIF.
+
+    ENDIF.
+
+*...//Heapify the list till root node
+    IF largest <> iv_current.
+      DATA(temp) = cv_table[ iv_current ].
+      cv_table[ iv_current ] = cv_table[ largest ].
+      cv_table[ largest ] = temp.
+      heapify( EXPORTING iv_current = largest iv_len = iv_len iv_minheap = iv_minheap
+               CHANGING cv_table = cv_table ).
+    ENDIF.
+
+  ENDMETHOD.
+
+
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method kth_largest_element
+* +-------------------------------------------------------------------------------------------------+
+* | [--->] IV_TABLE                       TYPE        ABADR_TAB_INT4
+* | [<-()] RV_RESULT                      TYPE        ABADR_TAB_INT4
+*...LeetCode 215. Kth Largest Element in an Array
+*...// Approach 2 -> using HEAP
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD kth_largest_element_heap.
+
+    DATA:  k TYPE i.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = k ).
+    cl_demo_input=>request( ).
+
+*...//If we need the Kth Largest, we need to MINHEAP
+*...//If we need the Kth smallest, we need to MAXHEAP
+*...//Pop the Heap till it has K Elements
+*...//Index 1 Value in the Heap will have the required result
+
+*...//Heapyfy the List
+    LOOP AT  iv_table INTO DATA(lv_num).
+      APPEND lv_num TO rv_result.
+      DATA(heapsize) = lines( rv_result ).
+      DATA(current) = heapsize DIV 2 .
+      WHILE current > 0.
+        heapify( EXPORTING iv_current = current iv_len = heapsize iv_minheap = abap_true
+                 CHANGING cv_table = rv_result ).
+        current = current - 1.
+      ENDWHILE.
+    ENDLOOP.
+
+
+*../Perform POP and Hepify to get Kth Element
+    WHILE heapsize > k.
+      DATA(temp) = rv_result[ 1 ].
+      rv_result[ 1 ] = rv_result[ heapsize ].
+      rv_result[ heapsize ] = temp.
+      DELETE  rv_result INDEX heapsize.
+      heapsize = heapsize - 1.
+      heapify( EXPORTING iv_current = 1 iv_len = heapsize iv_minheap = abap_true
+               CHANGING cv_table = rv_result ).
+    ENDWHILE.
+
+  ENDMETHOD.
+
+* <SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Private Method
+* +-------------------------------------------------------------------------------------------------+
+*. Approach 1: Sorting
+*...LeetCode 215. Kth Largest Element in an Array
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD kth_largest_element_sort.
+
+    DATA: k      TYPE i.
+    DATA(lt_temp) = iv_table.
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = k ).
+    cl_demo_input=>request( ).
+
+    IF lines( iv_table ) > k.
+*.../ Approach1 : Sorting
+      SORT lt_temp BY table_line DESCENDING.
+*...//Return the Kth Element
+      rv_result = lt_temp[ k ].
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  DATA(lt_list) = VALUE abadr_tab_int4( ( 15 ) ( 2 ) ( 10 )  ( 1 ) ( 5 ) ( 3 ) ( 8 ) ( 4 ) ( 2 ) ( 13 ) ).
+*  DATA(lt_list) = VALUE abadr_tab_int4( ( 3 ) ( 2 ) ( 1 )  ( 5 ) ( 6 ) ( 4 ) ).
+  DATA(lt_res) = zcl_kthlargest=>kth_largest_element_heap( lt_list ).
+*...//Display the Output
+  cl_demo_output=>display( data = lt_res[ 1 ]  name = 'Kth Largest Element using Heap'  ).
+  DATA(rv_res) = zcl_kthlargest=>kth_largest_element_sort( lt_list ).
+  cl_demo_output=>display( data = rv_res  name = 'Kth Largest Element using SORT'  ).

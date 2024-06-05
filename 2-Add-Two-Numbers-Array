@@ -1,0 +1,59 @@
+CLASS zcl_utility DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: add_two_number_arrays.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method Add_two_number_arrays
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 2. Add Two Numbers Arrays
+*...// Approach 2 -> using HEAP
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD add_two_number_arrays.
+
+    DATA: res TYPE abadr_tab_int4.
+
+    DATA(a) = VALUE abadr_tab_int4( ( 9 ) ( 5 ) ( 4 ) ( 9 ) ).
+    DATA(b) = VALUE abadr_tab_int4( ( 2 ) ( 1 ) ( 4 ) ).
+
+    DATA(m) = lines( a ).
+    DATA(n) = lines( b ).
+    DATA(carry) = 0.
+    DATA(sum) = 0.
+
+
+    WHILE m > 0 OR n > 0.
+
+      sum = COND #( WHEN line_exists( a[ m ] ) THEN  a[ m ] ELSE 0 ) +
+            COND #( WHEN line_exists( b[ n ] ) THEN  b[ n ] ELSE 0 ) + carry.
+
+      carry = sum DIV 10.
+      INSERT ( sum MOD 10 ) INTO res INDEX 1.
+
+      m -= 1.
+      n -= 1.
+
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = res name = 'Adding Two Number Arrays' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>add_two_number_arrays( ).

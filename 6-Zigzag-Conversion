@@ -1,0 +1,135 @@
+CLASS zcl_utility DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: zigzag_conversion.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method Zigzag_Conversion
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 6. Zigzag_Conversion
+*...// Approach 1: Simulate Zig-Zag Movement
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD zigzag_conversion.
+
+*  The number of rows of the matrix will be equal to numRows .
+*  We need to calculate the number of columns we need.
+*  Let's consider a part circled in red (one column, and a diagonal) as one section.
+*
+*  Each section will have at most  numRows - 1 columns in it (the last section might have fewer columns), as can be seen in the above example.
+*  In each section, we will have 2 * numRow - 2 characters, (numRow characters in one column and numRow - 2 in the diagonal).
+*  Thus, for a string of n characters, we will require at most ceil(n / (2 * numRows - 2) sections, and as each section will have numRows - 1 columns.
+*  We can say we need ceil(n / (2 * numRows - 2)) * (numRows - 1) columns.
+*  So, our matrix will be of dimension, numRows×numCols, where numCols = ceil(n / (2 * numRows - 2)) * (numRows - 1)).
+
+    TYPES: tt_row TYPE STANDARD TABLE OF char1 WITH EMPTY KEY.
+    TYPES: BEGIN OF yt_matrix,
+             rec TYPE tt_row,
+           END OF yt_matrix.
+
+    DATA: numrows   TYPE i VALUE 3,
+          input     TYPE string VALUE 'PAYPALISHIRING',
+          res       TYPE string,
+          res2      TYPE string,
+          len       TYPE i,
+          currrow   TYPE i VALUE 1,
+          currcol   TYPE i VALUE 1,
+          lt_matrix TYPE STANDARD TABLE OF yt_matrix WITH EMPTY KEY,
+          lt_row    TYPE tt_row.
+
+**..//Input for no. of consecutive elements
+*    cl_demo_input=>add_field( EXPORTING text = 'Enter input string:' CHANGING field = input ).
+*    cl_demo_input=>request( ).
+*
+**..//Input for no. of consecutive elements
+*    cl_demo_input=>add_field( EXPORTING text = 'Enter Number of rwos:' CHANGING field = numrows ).
+*    cl_demo_input=>request( ).
+
+    IF numrows = 1 OR numrows > strlen( input ).
+*...//Display the Output
+      cl_demo_output=>display( data = input name = 'Zigzag_Conversion' ).
+      RETURN.
+    ENDIF.
+
+    len = strlen( input ).
+    DATA(sections) = ceil( len / ( 2 * numrows - 2 ) ).
+*...//Determine Number of Columns
+    DATA(numcols) =  sections * ( numrows - 1 ).
+
+*..//Build Empty Matrix
+    DO numcols TIMES.
+      INSERT INITIAL LINE INTO lt_row INDEX 1.
+    ENDDO.
+    DO  numrows TIMES.
+      APPEND VALUE #( rec = lt_row ) TO lt_matrix.
+    ENDDO.
+
+    currrow = 1.
+    currcol = 1.
+*..//Main Algoritm
+*1. While moving from top to bottom in a column, currCol will remain the same but currRow will go from 0 to numRows.
+*2. While moving diagonally up, we move one cell up and one cell right, thus increment currCol by 1 and decrease currRow by 1 till it reaches the top (currRow=0)
+*3. We repeat this movement until we traverse all n characters of the input string.
+    DATA(currstringindex) = 0.
+    WHILE currstringindex < len .
+
+      currrow = 1.
+*      // Move down.
+      WHILE currrow <= numrows AND currstringindex < len.
+        lt_matrix[ currrow ]-rec[ currcol ] = input+currstringindex(1).
+        currrow = currrow + 1.
+        currstringindex = currstringindex  + 1.
+      ENDWHILE.
+
+      currrow -= 2.
+      currcol = currcol + 1.
+*// Move up (with moving right also).
+      WHILE currrow > 1 AND currcol < numcols AND currstringindex < len.
+        lt_matrix[ currrow ]-rec[ currcol ] = input+currstringindex(1).
+        currrow = currrow - 1.
+        currcol = currcol + 1.
+        currstringindex = currstringindex  + 1.
+      ENDWHILE.
+
+    ENDWHILE.
+
+*..//Result Population Approach 1
+    res2 = REDUCE string( INIT v = res
+                          FOR ls_matrix IN lt_matrix INDEX INTO lv_idx1
+                          FOR lv_rec IN ls_matrix-rec INDEX INTO lv_idx2
+                               NEXT v = v && lv_rec ).
+*..//Result Population Approach 2
+*    DATA(lt_res) = VALUE tt_row( FOR ls_matrix IN lt_matrix INDEX INTO lv_idx1
+*                   FOR lv_rec IN ls_matrix-rec INDEX INTO lv_idx2
+*                    ( COND #( WHEN lv_rec <> space THEN lv_rec ) ) ).
+*
+*    LOOP AT lt_res ASSIGNING FIELD-SYMBOL(<lfs_res>) WHERE table_line <> space.
+*      res2 = res2 && <lfs_res>.
+*    ENDLOOP.
+
+*..//Result Population Approach 3-Old Method
+    LOOP AT lt_matrix ASSIGNING FIELD-SYMBOL(<lfs_matrix>).
+      LOOP AT <lfs_matrix>-rec ASSIGNING FIELD-SYMBOL(<lfs_row>).
+        res = res && <lfs_row>.
+      ENDLOOP.
+    ENDLOOP.
+
+    WRITE:/'ZIGJAG CONVERSION of String: ', input , 'IS: ', res, res2.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>zigzag_conversion( ).

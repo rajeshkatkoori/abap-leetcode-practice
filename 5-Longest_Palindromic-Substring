@@ -1,0 +1,167 @@
+CLASS zcl_utility DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: longest_palindromic_substr,
+      pol_check_helper
+        IMPORTING
+                  !iv_i         TYPE i
+                  !iv_j         TYPE i
+                  !iv_s         TYPE string
+        RETURNING VALUE(rv_res) TYPE boolean,
+      pol_expand_helper
+        IMPORTING
+                  !iv_i         TYPE i
+                  !iv_j         TYPE i
+                  !iv_s         TYPE string
+        RETURNING VALUE(rv_len) TYPE i.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method Zigzag_Conversion
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 5. Longest Palindromic Substring
+*...// Approach 3: Expand From Centers
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD longest_palindromic_substr.
+
+    DATA: lv_input TYPE string,
+          res      TYPE string.
+
+
+    lv_input = 'babad'. "'cbaeabd'
+    lv_input = 'cbbd'.
+    lv_input = 'cbebdh'.
+    lv_input = 'cbaeabd'.
+
+*...//Approach1: Brute force , Checking All Substrings
+    DATA(strlen) = strlen(  lv_input ).
+
+    DATA(length) = strlen.
+**...Polidrome check for each Combination of Substrings from max lenght till 0
+    WHILE length > 0 .
+      DATA(start) = 0.
+      WHILE start < strlen - length .
+        IF pol_check_helper( EXPORTING iv_i = start iv_j = start + length iv_s = lv_input ).
+          IF start = 0.
+            DATA(len) = start + length.
+          ELSE.
+            len = start + length - 1.
+          ENDIF.
+          res = substring( val = lv_input
+                           off = start
+                           len = len ).
+          EXIT.
+        ENDIF.
+        start += 1.
+      ENDWHILE.
+      IF res IS NOT INITIAL.
+        EXIT.
+      ENDIF.
+      length -= 1.
+    ENDWHILE.
+
+    WRITE:/'Longest Polindrome is', res.
+
+*...// Approach 3: Expand From Centers
+    DATA(i) = 0.
+    DATA(j) = 0.
+
+    start = 0.
+    WHILE start < strlen.
+
+*..///Check Odd Length Polidromes
+      DATA(oddlength) = pol_expand_helper( EXPORTING iv_i = start iv_j = start iv_s = lv_input ).
+      IF ( oddlength > j - i + 1 ).
+        DATA(dist) = oddlength DIV 2.
+        i = start - dist.
+        j = start + dist.
+      ENDIF.
+
+
+*..///Check Even Length Polidromes
+      DATA(evenlength) = pol_expand_helper( EXPORTING iv_i = start iv_j = start + 1 iv_s = lv_input ).
+      IF ( evenlength > j - i + 1 ).
+        dist = ( evenlength DIV 2 ) - 1.
+        i = start - dist.
+        j = start + dist + 1.
+      ENDIF.
+
+      start += 1.
+    ENDWHILE.
+
+    IF i = 0.
+      j += 1.
+    ENDIF.
+
+    WRITE:/'Longest Polindrome is', substring( val = lv_input
+                                                  off = i
+                                                  len = j  ).
+
+  ENDMETHOD.
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method pol_expand_helper
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 5. Longest Palindromic Substring
+*...// Approach 3: Expand From Centers
+* Helper Method to check Polidrom from the given indices and return its length
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD pol_expand_helper.
+
+    DATA(left) = iv_i.
+    DATA(right) = iv_j.
+    DATA(s) = iv_s.
+
+    WHILE (  left >= 0 AND right < strlen( iv_s ) AND s+left(1) = s+right(1) ).
+      left -= 1.
+      right += 1.
+    ENDWHILE.
+
+    rv_len = right - left - 1.
+
+  ENDMETHOD.
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method pol_check_helper
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 5. Longest Palindromic Substring
+*...// Approach 3: Expand From Centers
+* Helper Method to check Polidrom from the given indices
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD pol_check_helper.
+
+    DATA(left) = iv_i.
+    DATA(right) = iv_j - 1.
+    DATA(s) = iv_s.
+
+    IF left = right.
+      rv_res = abap_false.
+      RETURN.
+    ENDIF.
+
+    WHILE ( left < right ).
+      IF s+left(1) <> s+right(1).
+        rv_res = abap_false.
+        RETURN.
+      ENDIF.
+
+      left += 1.
+      right -= 1.
+    ENDWHILE.
+    rv_res = abap_true.
+    RETURN.
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+  zcl_utility=>longest_palindromic_substr( ).

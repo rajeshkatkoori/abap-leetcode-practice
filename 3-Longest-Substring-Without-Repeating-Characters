@@ -1,0 +1,168 @@
+*3-Longest-Substring-Without-Repeating-Characters
+CLASS zcl_utility DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: lengthoflongestsubstring,
+      checkrepetition
+        IMPORTING
+                  !iv_i         TYPE i
+                  !iv_j         TYPE i
+                  !iv_s         TYPE string
+        RETURNING VALUE(rv_res) TYPE boolean.
+
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method lengthOfLongestSubstring
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 3. Longest Substring Without Repeating Characters
+*...// Approach 1,2: Bruteforce and Sliding Window
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD lengthoflongestsubstring.
+
+    DATA: lv_input TYPE string,
+          res      TYPE i.
+
+    lv_input = 'abcabcbb'.
+    lv_input = 'bbbbb'.
+    lv_input = 'pwwkew'.
+
+*...//Approach1: Brute force , Checking All Substrings
+    DATA(strlen) = strlen(  lv_input ).
+
+    DATA(i) = 0.
+    DATA(j) = 0.
+
+    WHILE i < strlen.
+      j = i.
+      WHILE j < strlen .
+        IF ( checkrepetition( EXPORTING iv_i = i iv_j = j iv_s = lv_input ) ).
+          res = nmax( val1 = res val2 = j - i + 1 ).
+        ENDIF.
+        j = j + 1.
+      ENDWHILE.
+      i = i + 1.
+    ENDWHILE.
+
+    WRITE:/'Longest Substring length Without Repeating Characters:', res.
+*..//Complexity O(n3 Cube )
+*..//Space O(m)
+
+*...//Approach2: Sliding Window Approach
+    TYPES: tyt_input TYPE TABLE OF i WITH EMPTY KEY,
+           BEGIN OF tys_value,
+             char  TYPE char1,
+             count TYPE i,
+           END OF tys_value,
+           tt_index_input TYPE TABLE OF tys_value WITH EMPTY KEY.
+
+    DATA: lt_index TYPE tt_index_input.
+
+    DATA(left) = 0.
+    DATA(right) = 0.
+    res = 0.
+    DATA(n) = strlen.
+
+    WHILE right < n .
+
+      DATA(r) = lv_input+right(1).
+      IF line_exists( lt_index[ char = r ] ).
+        lt_index[ char = r ]-count += 1.
+      ELSE.
+        APPEND VALUE #( char = r count = 1 ) TO lt_index.
+      ENDIF.
+
+      WHILE ( lt_index[ char = r ]-count > 1 ).
+        DATA(l) = lv_input+left(1).
+        lt_index[ char = l ]-count -= 1 .
+
+        left += 1.
+      ENDWHILE.
+
+
+      DATA(currentlength) = right - left + 1.
+      IF ( currentlength > res ).
+        res = currentlength.
+      ENDIF.
+
+      right = right + 1.
+    ENDWHILE.
+    WRITE:/'Longest Substring length Without Repeating Characters:', res.
+
+
+*...//Approach2: Sliding Window Approach Optimized
+    left = 0.
+    right = 0.
+    CLEAR lt_index.
+    res = 0.
+
+    WHILE right < n .
+
+      r = lv_input+right(1).
+
+      IF line_exists( lt_index[ char = r ] ).
+        lt_index[ char = r ]-count += 1.
+      ELSE.
+        APPEND VALUE #( char = r count = 1 ) TO lt_index.
+      ENDIF.
+
+      data(charindex) =  lt_index[ char = r ]-count.
+      IF charindex > 1 .
+        left = nmax( val1 = left val2 = charindex ).
+      ENDIF.
+
+      res = nmax( val1 = res val2 = right - left + 1 ).
+      lt_index[ char = r ]-count = right + 1.
+
+      right = right + 1.
+    ENDWHILE.
+    WRITE:/'Longest Substring length Without Repeating Characters:', res.
+  ENDMETHOD.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method checkrepetition
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 3. Longest Substring Without Repeating Characters
+*   Helper Method to check checkRepetition to find lengthOfLongestSubstring
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD checkrepetition.
+
+    TYPES: BEGIN OF yt_hashset,
+             character TYPE char1,
+           END OF yt_hashset.
+
+    DATA: lt_hash TYPE HASHED TABLE OF yt_hashset WITH UNIQUE KEY character.
+
+    DATA(start) = iv_i.
+    DATA(end) = iv_j.
+
+    WHILE start <= end.
+      DATA(char) = iv_s+start(1).
+      IF line_exists( lt_hash[ character = char ] ).
+        rv_res = abap_false.
+        RETURN.
+      ELSE.
+        INSERT VALUE #( character = char ) INTO TABLE lt_hash.
+      ENDIF.
+      start += 1.
+    ENDWHILE.
+    rv_res = abap_true.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>lengthoflongestsubstring( ).

@@ -1,0 +1,187 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: median_of_two_sorted_arrays.
+
+  PRIVATE SECTION.
+    CLASS-DATA: p1 TYPE i VALUE 1,
+                p2 TYPE i VALUE 1.
+    CLASS-METHODS: getmin
+      IMPORTING
+        !nums1        TYPE abadr_tab_int4
+        !nums2        TYPE abadr_tab_int4
+      RETURNING
+        VALUE(rv_res) TYPE i,
+      solve
+        IMPORTING
+          !a            TYPE abadr_tab_int4
+          !astart       TYPE i
+          !aend         TYPE i
+          !b            TYPE abadr_tab_int4
+          !bstart       TYPE i
+          !bend         TYPE i
+          !k            TYPE i
+        RETURNING
+          VALUE(rv_res) TYPE i.
+
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method lengthOfLongestSubstring
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 4. Median of Two Sorted Arrays
+*...// Approach 1,2 Merge Sort and Binary Search
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD median_of_two_sorted_arrays.
+
+    DATA: res TYPE  p DECIMALS 4,
+          m   TYPE i,
+          n   TYPE i,
+          p1  TYPE i,
+          p2  TYPE i.
+
+    DATA(nums1) = VALUE abadr_tab_int4( ( 1 ) ( 2 ) ( 3 )  ( 4 ) ( 6 ) ( 8 ) ( 11 )  ).
+    DATA(nums2) = VALUE abadr_tab_int4( ( 5 ) ( 7 ) ( 9 ) ( 10 ) ( 12 ) ).
+
+    nums1 = VALUE abadr_tab_int4( ( 1 ) ( 3 ) ).
+    nums2 = VALUE abadr_tab_int4( ( 2 ) ).
+
+    nums1 = VALUE abadr_tab_int4( ( 1 ) ( 2 ) ).
+  clear nums2.
+    m = lines( nums1 ).
+    n = lines( nums2 ).
+
+*    DATA(a) = ( m + n ) DIV 2 .
+*    DATA(b) = ( m + n ) / 2 .
+*    write:/ a, b.
+*    return.
+
+    DATA(i) = 0.
+*...Approch 1: Merge Sort ( not working for few scenarios )
+    IF ( m + n ) MOD 2 = 0.
+*...Even Length Sorted array
+      WHILE ( i < ( m + n ) DIV 2 - 1 ).
+        DATA(tmp) = getmin( EXPORTING nums1 = nums1 nums2 = nums2 ).
+        i = i + 1.
+      ENDWHILE.
+      res = (  getmin( EXPORTING nums1 = nums1 nums2 = nums2 ) + getmin( EXPORTING nums1 = nums1 nums2 = nums2 ) ) / 2.
+    ELSE.
+*...Odd Length Sorted array
+      DATA(x) =  ( m + n ) DIV 2.
+      DATA(y) =  ( m + n ) / 2.
+      WHILE ( i < ( m + n ) DIV 2 ).
+        tmp = getmin( EXPORTING nums1 = nums1 nums2 = nums2 ).
+        i = i + 1.
+      ENDWHILE.
+      res = getmin( EXPORTING nums1 = nums1 nums2 = nums2 ).
+    ENDIF.
+    WRITE:/'Longest Substring length Without Repeating Characters:', res.
+
+
+*...//Approach 2: Binary Search Approach ( Working fine ).
+    DATA(na) = lines( nums1 ).
+    DATA(nb) = lines( nums2 ).
+    n = ( na + nb ).
+
+    IF n  MOD 2 = 1.
+*...ODD Length Sorted array
+      res = solve( EXPORTING a = nums1 astart = 1 aend = na - 1 b = nums2 bstart = 1 bend = nb k = n / 2 + 1 ).
+    ELSE.
+*...EVEN Length Sorted array
+      res = ( solve( EXPORTING a = nums1 astart = 1 aend = na b = nums2 bstart = 1 bend = nb k = n DIV 2 + 1 ) +
+              solve( EXPORTING a = nums1 astart = 1 aend = na b = nums2 bstart = 1 bend = nb k = n DIV 2 + 2 ) ) / 2.
+    ENDIF.
+
+    WRITE:/'Longest Substring length Without Repeating Characters:', res.
+
+  ENDMETHOD.
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 4. Median of Two Sorted Arrays
+*  // Approach 1 Merge Sort get the min of two numbers
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD getmin.
+
+    DATA(m) = lines( nums1 ).
+    DATA(n) = lines( nums2 ).
+
+    IF ( p1 < m AND p2 < n ).
+      IF nums1[ p1 ] < nums2[ p2 ].
+        p1 = p1 + 1.
+        rv_res =  nums1[ p1 ].
+      ELSE.
+        p2 = p2 + 1.
+        rv_res = nums2[ p2 ].
+      ENDIF.
+    ELSEIF ( p1 < m ).
+      p1 = p1 + 1.
+      rv_res = nums1[ p1 ].
+    ELSEIF ( p2 < n ).
+      p2 = p2 + 1.
+      rv_res = nums2[ p2 ].
+    ELSEIF ( p1 = m ).
+      rv_res = nums1[ p1 ].
+    ELSEIF ( p2 = n ).
+      rv_res = nums2[ p2 ].
+    ENDIF.
+
+  ENDMETHOD.
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode 4. Median of Two Sorted Arrays
+*  // Approach 1 Binary seach to get the Median number
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD solve.
+
+*// If the segment of on array is empty, it means we have passed all
+*// its element, just return the corresponding element in the other array.
+    IF ( aend < astart ).
+      rv_res = b[ k - astart ].
+      RETURN.
+    ENDIF.
+    IF ( bend < bstart ).
+      rv_res = a[ k - bstart ].
+      RETURN.
+    ENDIF.
+
+
+*    // Get the middle indexes and middle values of A and B.
+    DATA(aindex) = ( astart + aend ) / 2.
+    DATA(bindex) = ( bstart + bend ) / 2.
+    DATA(avalue) = a[ aindex ].
+    DATA(bvalue) = b[ bindex ].
+
+* // If k is in the right half of A + B, remove the smaller left half.
+    IF ( aindex + bindex < k ).
+      IF  ( avalue > bvalue ).
+        rv_res = solve( EXPORTING a = a astart = astart aend = aend b = b  bstart = bindex + 1 bend = bend k = k ).
+        RETURN.
+      ELSE.
+        rv_res = solve( EXPORTING a = a astart = aindex + 1 aend = aend b = b bstart = bstart bend = bend k = k ).
+        RETURN.
+      ENDIF.
+
+*    // Otherwise, remove the larger right half.
+    ELSE.
+      IF ( avalue > bvalue ).
+        rv_res = solve( EXPORTING a = a  astart = astart aend = aindex - 1 b = b  bstart = bstart bend = bend k = k ).
+        RETURN.
+      ELSE.
+        rv_res = solve( EXPORTING a = a astart = astart aend = aend b = b bstart = bstart bend = bindex - 1 k = k ).
+        RETURN.
+      ENDIF.
+
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>median_of_two_sorted_arrays( ).

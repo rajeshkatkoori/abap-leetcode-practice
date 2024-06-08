@@ -1,0 +1,129 @@
+https://leetcode.com/problems/roman-to-integer/description/
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: roman_to_integer.
+
+  PRIVATE SECTION..
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method find_nums_with_even_no_digit
+* +-------------------------------------------------------------------------------------------------+
+*   Method roman_to_integer                                            *
+*   Method to convert Roman to  Integer Conversion .                   *
+*   LetCode:13: Roman to Integer
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD roman_to_integer.
+
+
+    TYPES: BEGIN OF ty_map,
+             char(1) TYPE c,
+             value   TYPE i,
+           END OF ty_map,
+           tt_map TYPE TABLE OF ty_map WITH EMPTY KEY.
+
+    DATA: lv_input  TYPE string.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_input ).
+    cl_demo_input=>request( ).
+
+
+*...Approach 1
+    DATA(lt_map) =  VALUE tt_map( ( char = 'M' value = 1000 )
+                                  ( char = 'D' value = 500 )
+                                  ( char = 'C' value = 100 )
+                                  ( char = 'L' value = 50 )
+                                  ( char = 'X' value = 10 )
+                                  ( char = 'V' value = 5 )
+                                  ( char = 'I' value = 1 ) ).
+
+
+    DATA(lv_len) = strlen( lv_input ).
+    DATA(lv_result) = 0.
+
+    DO lv_len  TIMES.
+      DATA(lv_i) = sy-index - 1.
+      DATA(lv_j) = sy-index.
+      DATA(lv_c) = lv_input+lv_i(1).
+      IF lv_j < lv_len .
+        DATA(lv_n) = lv_input+lv_j(1).
+      ENDIF.
+      IF lv_j < lv_len AND ( lt_map[ char = lv_c ]-value < lt_map[ char = lv_n ]-value ).
+        lv_result -= lt_map[ char = lv_c ]-value.
+      ELSE.
+        lv_result += lt_map[ char = lv_c ]-value.
+      ENDIF.
+
+    ENDDO.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lv_result name = 'Roman to Interger-1' ).
+
+*...Approach 2
+    DATA: ans TYPE i VALUE 0,
+          num TYPE i VALUE 0,
+          len TYPE i VALUE 0.
+    len = strlen( lv_input ) .
+
+    DO len TIMES.
+
+      num = SWITCH #( substring( val = lv_input off = len - sy-index len = 1 )
+          WHEN 'I' THEN 1
+          WHEN 'V' THEN 5
+          WHEN 'X' THEN 10
+          WHEN 'L' THEN 50
+          WHEN 'C' THEN 100
+          WHEN 'D' THEN 500
+          WHEN 'M' THEN 1000  ).
+
+      IF ( 4 * num < ans ).
+        ans -= num.
+      ELSE.
+        ans += num.
+      ENDIF.
+
+    ENDDO.
+
+    WRITE:/ ans.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = ans name = 'Roman to Interger-2' ).
+
+
+*...//Approach 3
+*...//Approach 3 ALL additons
+    REPLACE 'IV' WITH 'IIII'  INTO lv_input.
+    REPLACE 'IX' WITH 'VIIII' INTO lv_input.
+    REPLACE 'XL' WITH 'XXXX'  INTO lv_input.
+    REPLACE 'XC' WITH 'LXXXX' INTO lv_input.
+    REPLACE 'CD' WITH 'CCCC' INTO lv_input.
+    REPLACE 'CM' WITH 'DCCCC' INTO lv_input.
+    DATA(slen) = strlen( lv_input ) - 1.
+
+    DATA(i) = 0.
+    DATA(result) = 0.
+    WHILE i <= slen.
+      result += lt_map[ char = lv_input+i(1) ]-value .
+      i += 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = 'Roman to Interger-3' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>roman_to_integer( ).

@@ -1,0 +1,59 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: find_nums_with_even_no_digits.
+
+  PRIVATE SECTION..
+    CLASS-METHODS: number_of_digits
+                    IMPORTING iv_num        TYPE i
+                    RETURNING VALUE(rv_res) TYPE i.
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method find_nums_with_even_no_digit
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode1295. Find Numbers with Even Number of Digits
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD find_nums_with_even_no_digits.
+    DATA: lt_res TYPE abadr_tab_int4.
+
+    DATA(arr) = VALUE abadr_tab_int4( ( 44 ) ( 526 ) ( 15 ) ( 7 ) ( 38968 ) ( 15 ) ( 7896 ) ( 865 ) ).
+
+    LOOP AT arr ASSIGNING FIELD-SYMBOL(<lfs_num>).
+
+      IF number_of_digits( <lfs_num> ) MOD 2 = 0.
+        APPEND <lfs_num> TO lt_res.
+      ENDIF.
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_res name = 'Numbers with Even Number of Digits' ).
+  ENDMETHOD.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method find_nums_with_even_no_digit
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode1295. Helper Method to Find Numbers with Even Number of Digits
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD number_of_digits.
+
+    DATA(num) = iv_num.
+
+    WHILE num > 0.
+      num = num DIV 10.
+      rv_res += 1.
+    ENDWHILE.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>find_nums_with_even_no_digits( ).

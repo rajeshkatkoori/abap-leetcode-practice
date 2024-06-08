@@ -1,0 +1,72 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: duplicate_zeros.
+
+  PRIVATE SECTION..
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method Duplicate_Zeros
+* +-------------------------------------------------------------------------------------------------+
+*...LeetCode1089. Duplicate Zeros
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD duplicate_zeros.
+
+
+    DATA(arr) = VALUE abadr_tab_int4( ( 1 ) ( 0 ) ( 2 ) ( 3 ) ( 4 ) ( 5 ) ( 0 ) ).
+    arr = VALUE abadr_tab_int4( ( 1 ) ( 0 ) ( 2 ) ( 3 ) ( 0 ) ( 4 ) ( 5 ) ( 0 ) ).
+
+    DATA(possibledups) = 0.
+    DATA(length) = lines( arr ).
+    DATA(left) = 1.
+*        // Find the number of zeros to be duplicated
+*        // Stopping when left points beyond the last element in the original array
+*        // which would be part of the modified array
+
+    WHILE left <= length - possibledups.
+      IF arr[ left ] = 0.
+*       // Edge case: This zero can't be duplicated. We have no more space,
+*       // as left is pointing to the last element which could be included
+        IF ( left = length - possibledups ).
+*       // For this zero we just copy it without duplication.
+          arr[ length ] = 0.
+          length -= 1.
+          EXIT.
+        ENDIF.
+
+        possibledups += 1.
+
+      ENDIF.
+      left += 1.
+    ENDWHILE.
+
+*        // Start backwards from the last element which would be part of new array.
+    DATA(last) = length - possibledups.
+    WHILE last > 0.
+      IF arr[ last ] = 0.
+        arr[ last + possibledups ] = 0.
+        possibledups = possibledups - 1.
+        arr[ last + possibledups ] = 0.
+      ELSE.
+        arr[ last + possibledups ] = arr[ last ].
+      ENDIF.
+      last -= 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = arr name = 'Duplicate Zeros' ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>duplicate_zeros( ).

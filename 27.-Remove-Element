@@ -1,0 +1,68 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: remove_element.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method remove_element                                            *
+*   LetCode:27 remove_element
+*   Time Complexity O(n)
+*----------------------------------------------------------------------*
+  METHOD remove_element.
+
+    TYPES:i_table TYPE TABLE OF i WITH DEFAULT KEY.
+    DATA: lt_nums TYPE i_table,
+          start   TYPE i VALUE 1,
+          end     TYPE i,
+          lv_val  TYPE i VALUE 1.
+
+    lt_nums = VALUE #( ( 0 ) ( 0 ) ( 1 ) ( 1 ) ( 1 ) ( 2 ) ( 2 ) ( 3 ) ( 3 ) ( 4 ) ).
+    end = lines( lt_nums ).
+*....//Approach 1: Pointer from start and end
+*...Efficient of number of removable elements are small
+    WHILE start <= end.
+      IF lt_nums[ start ] = lv_val.
+        lt_nums[ start ] = lt_nums[ end ].
+        lt_nums[ end ] = -1.
+        end = end - 1.
+      ELSE.
+        start = start + 1.
+      ENDIF.
+
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = start - 1  name = 'Remove Duplicates from Array' ).
+
+*....//Approach 2: Pointer from start
+    lt_nums = VALUE #( ( 0 ) ( 0 ) ( 1 ) ( 1 ) ( 1 ) ( 2 ) ( 2 ) ( 3 ) ( 3 ) ( 4 ) ).
+    DATA(reader) = 1..
+    DATA(writer) = 1.
+    DATA(len) = lines( lt_nums ).
+
+    WHILE reader <= len .
+      IF lt_nums[ reader ] <> lv_val.
+        lt_nums[ writer ] = lt_nums[ reader ].
+        writer = writer + 1.
+      ENDIF.
+      reader = reader + 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = writer - 1  name = 'Remove Duplicates from Array' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>remove_element( ).

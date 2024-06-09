@@ -15,7 +15,7 @@ CLASS zcl_utility IMPLEMENTATION.
 
 *----------------------------------------------------------------------*
 *  Method palindrome_string                                            *
-*  LeetCode #9,25. palindrome_number
+*  LeetCode #9,125. palindrome_number
 *----------------------------------------------------------------------*
   METHOD palindrome_string.
 

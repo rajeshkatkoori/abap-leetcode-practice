@@ -1,0 +1,106 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: integer_to_roman.
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*<SIGNATURE>---------------------------------------------------------------------------------------+
+* | Static Public Method integer_to_roman
+* +-------------------------------------------------------------------------------------------------+
+*   Method integer_to_roman                                            *
+*   Method to convert Integer to Roman                           *
+*   LetCode:12. Integer to Roman
+* +--------------------------------------------------------------------------------------</SIGNATURE>
+  METHOD integer_to_roman.
+
+    TYPES: BEGIN OF ty_map,
+             char(2) TYPE c,
+             value   TYPE i,
+           END OF ty_map,
+           tt_map TYPE TABLE OF ty_map WITH EMPTY KEY.
+
+    TYPES: tt_chars TYPE TABLE OF char5 WITH EMPTY KEY.
+
+    DATA: lv_num  TYPE i,
+          lv_num2 TYPE i,
+          result  TYPE string.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_num ).
+    cl_demo_input=>request( ).
+
+    lv_num2 = lv_num.
+
+    IF lv_num > 3999.
+      RETURN.
+    ENDIF.
+
+*...Approach 1 Greedy method
+    DATA(lt_map) =  VALUE tt_map( ( char = 'M'  value = 1000 )
+                                  ( char = 'CM' value = 900 )
+                                  ( char = 'D'  value = 500 )
+                                  ( char = 'CD' value = 400 )
+                                  ( char = 'C'  value = 100 )
+                                  ( char = 'XC' value = 90 )
+                                  ( char = 'L'  value = 50 )
+                                  ( char = 'XL' value = 40 )
+                                  ( char = 'X'  value = 10 )
+                                  ( char = 'IX' value = 9 )
+                                  ( char = 'V'  value = 5 )
+                                  ( char = 'IV' value = 4 )
+                                  ( char = 'I'  value = 1 ) ).
+
+    DATA(i) = 1.
+*lines(lt_map) = 13 So 13 is taken below
+    WHILE i <= 13 AND lv_num > 0.
+
+      WHILE lt_map[ i ]-value <= lv_num.
+        lv_num = lv_num - lt_map[ i ]-value.
+        result = result && lt_map[ i ]-char.
+      ENDWHILE.
+
+      i = i + 1.
+    ENDWHILE.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = 'Roman to Interger-3' ).
+
+
+*....Approach 2: Hardcode Digits
+    lv_num = lv_num2.
+    CLEAR: result.
+
+    DATA(thousands) = VALUE tt_chars( ( '' ) ( 'M' ) ( 'MM' ) ( 'MMM' ) ).
+    DATA(hundreds) = VALUE tt_chars( ( '' )  ( 'C' )  ( 'CC' )  ( 'CCC' )  ( 'CD' )
+                                    ( 'D' )  ( 'DC' ) ( 'DCC' ) ( 'DCCC' ) ( 'CM' ) ).
+    DATA(tens) = VALUE tt_chars( ( '' )  ( 'X' )  ( 'XX' )  ( 'XXX' )  ( 'XL' )
+                                 ( 'L' ) ( 'LX' ) ( 'LXX' ) ( 'LXXX' ) ( 'XC' ) ).
+
+    DATA(ones) = VALUE tt_chars( ( '' )  ( 'I' )  ( 'II' )  ( 'III' )  ( 'IV' )
+                                 ( 'V' ) ( 'VI' ) ( 'VII' ) ( 'VIII' ) ( 'IX' ) ).
+
+
+    result = result && thousands[ ( lv_num DIV 1000 ) + 1 ].
+    result = result && hundreds[ ( lv_num MOD 1000 DIV 100 ) + 1 ].
+    result = result && tens[ ( lv_num MOD 100 DIV 10 ) + 1 ].
+    result = result && ones[ ( lv_num MOD 10 ) + 1 ].
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = 'Roman to Interger-3' ).
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>integer_to_roman( ).

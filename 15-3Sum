@@ -1,0 +1,220 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+    TYPES: BEGIN OF yt_ret,
+             v1 TYPE i,
+             v2 TYPE i,
+             v3 TYPE i,
+           END OF yt_ret,
+           tt_ret TYPE TABLE OF yt_ret WITH EMPTY KEY.
+
+    CLASS-METHODS: three_sum,
+      two_sum
+        IMPORTING
+                  !iv_nums TYPE abadr_tab_int4
+                  !iv_i    TYPE i
+                  !iv_flag TYPE char2
+        CHANGING  !cv_res  TYPE tt_ret.
+
+  PRIVATE SECTION..
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method Three_sum                                *
+*   Method to find Three_sum                        *
+*   LetCode:15 3sum
+*   Time Complexity O(nsquare)
+*----------------------------------------------------------------------*
+  METHOD three_sum.
+
+    DATA:i         TYPE i,
+         len       TYPE i,
+         lt_res_2p TYPE tt_ret,
+         lt_res_hs TYPE tt_ret,
+         lt_res_ns TYPE tt_ret.
+
+    DATA(input) = VALUE abadr_tab_int4( ( -1 ) ( 0 ) ( 1 ) ( 2 ) ( -1 ) ( -4 )  ).
+
+*....//Approach 1: Two Pointers
+    DATA(lt_nums) = input.
+    SORT lt_nums BY table_line.
+    len = lines( input ).
+    i = 1.
+    WHILE i <= len AND lt_nums[ i ] <= 0.
+
+      IF i > 1 AND lt_nums[ i ] = lt_nums[ i - 1 ].
+        i = i + 1.
+      ENDIF.
+*...//Call Two Sum Solution Approach 1: Two Pointers
+      two_sum( EXPORTING iv_nums = lt_nums iv_i = i iv_flag = '2P'  CHANGING cv_res = lt_res_2p ).
+*...//Call Two Sum Solution Approach 2: Hashset
+      two_sum( EXPORTING iv_nums = lt_nums iv_i = i iv_flag = 'HS'  CHANGING cv_res = lt_res_hs ).
+
+      i = i + 1.
+
+    ENDWHILE.
+
+*...//Display the Result
+*..//Approach 1: Two Pointers
+    WRITE:/ 'Approach 1: Two Pointers:'.
+    LOOP AT lt_res_2p ASSIGNING FIELD-SYMBOL(<lfs_res>).
+      WRITE:/ <lfs_res>-v1,<lfs_res>-v2, <lfs_res>-v3.
+    ENDLOOP.
+
+
+*..//Approach 2: Hashset
+    WRITE:/ 'Approach 2: Hashset:'.
+    LOOP AT lt_res_hs ASSIGNING <lfs_res>.
+      WRITE:/ <lfs_res>-v1,<lfs_res>-v2, <lfs_res>-v3.
+    ENDLOOP.
+
+
+*..//Approach 3: No-Sort
+*...//Call Two Sum Solution Approach 3: No-Sort
+    two_sum( EXPORTING iv_nums = lt_nums iv_i = i iv_flag = 'NS'  CHANGING cv_res = lt_res_ns ).
+
+    WRITE:/ 'Approach 3: No Sort:'.
+    LOOP AT lt_res_ns ASSIGNING <lfs_res>.
+      WRITE:/ <lfs_res>-v1,<lfs_res>-v2, <lfs_res>-v3.
+    ENDLOOP.
+
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*   Method Two_sum                                                     *
+*   Method to find Two Sum                                             *
+*   LetCode:15 3sum
+*----------------------------------------------------------------------*
+  METHOD two_sum.
+
+    TYPES: BEGIN OF yt_hashmap,
+             key   TYPE i,
+             index TYPE i,
+           END OF yt_hashmap,
+           tt_hashmap TYPE TABLE OF yt_hashmap WITH EMPTY KEY.
+
+    TYPES:
+      BEGIN OF ty_hashset,
+        value TYPE i,
+      END OF ty_hashset,
+      tt_hashset TYPE TABLE OF ty_hashset WITH EMPTY KEY.
+
+    DATA: lt_temp TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+
+    DATA: dups TYPE tt_hashset,
+          seen TYPE tt_hashmap.
+
+
+    DATA(len) = lines( iv_nums ).
+
+*...//Two Pointer Approach
+    IF iv_flag = '2P'.
+      DATA(i) = iv_i.
+      DATA(lo) = i + 1.
+      DATA(hi) = len.
+
+      WHILE ( lo < hi ).
+        DATA(sum) = iv_nums[ i ] + iv_nums[ lo ] + iv_nums[ hi ].
+        IF ( sum < 0 ) .
+          lo = lo + 1.
+        ELSEIF ( sum > 0 ).
+          hi = hi - 1.
+        ELSE.
+          APPEND VALUE #( v1 = iv_nums[ i ] v2 = iv_nums[ lo ] v3 = iv_nums[ hi ] ) TO cv_res.
+          lo = lo + 1.
+          hi = hi - 1.
+          WHILE ( lo < hi AND iv_nums[ lo ] = iv_nums[ lo - 1 ] ).
+            lo = lo + 1.
+          ENDWHILE.
+        ENDIF.
+      ENDWHILE.
+    ENDIF.
+
+
+*...//Hash Set Approach
+    IF iv_flag = 'HS'.
+      i = iv_i.
+      DATA(j) = i + 1.
+      DATA(lt_hash) = VALUE tt_hashset( ).
+
+      WHILE j <= lines( iv_nums ).
+
+        DATA(complement) = ( iv_nums[ i ] * -1 ) + ( iv_nums[ j ] * -1 ).
+        IF ( line_index( lt_hash[ value = complement ] ) > 0 ).
+
+          APPEND VALUE #( v1 = iv_nums[ i ] v3 = iv_nums[ j ] v2 = complement  ) TO cv_res.
+
+          WHILE ( j + 1  < len AND  iv_nums[ j ] =  iv_nums[ j + 1 ]  ).
+            j = j + 1.
+          ENDWHILE.
+
+        ENDIF.
+        APPEND VALUE #( value = iv_nums[ j ] ) TO lt_hash.
+        j = j + 1.
+      ENDWHILE.
+    ENDIF.
+
+*...//Approach 3: "No-Sort"
+    IF iv_flag = 'NS'.
+*...//Call Two Sum Solution Approach 3: No-Sort
+      i = 1.
+      WHILE i < len .
+
+        IF NOT line_exists( dups[ value = iv_nums[ i ] ]  ).
+          APPEND VALUE #( value = iv_nums[ i ] ) TO dups.
+
+          j = i + 1.
+          WHILE j <= lines( iv_nums ).
+
+            complement = ( iv_nums[ i ] * -1 ) + ( iv_nums[ j ] * -1 ).
+            IF ( line_index( lt_hash[ value = complement ] ) > 0 ).
+              lt_temp = VALUE #( ( iv_nums[ i ] ) ( iv_nums[ j ] ) ( complement ) ).
+              SORT lt_temp BY table_line.
+              IF line_index( cv_res[ v1 = lt_temp[ 1 ] v2 = lt_temp[ 2 ] v3 = lt_temp[ 3 ] ] ) = 0.
+                APPEND VALUE #( v1 = lt_temp[ 1 ] v2 = lt_temp[ 2 ] v3 = lt_temp[ 3 ]  ) TO cv_res.
+              ENDIF.
+              CLEAR lt_temp.
+
+              WHILE ( j + 1  < len AND  iv_nums[ j ] =  iv_nums[ j + 1 ]  ).
+                j = j + 1.
+              ENDWHILE.
+
+            ENDIF.
+            APPEND VALUE #( value = iv_nums[ j ] ) TO lt_hash.
+            j = j + 1.
+          ENDWHILE.
+*          WHILE j <= len.
+*            complement = ( iv_nums[ i ] * -1 ) + ( iv_nums[ j ] * -1 ).
+*            IF line_exists( seen[ key = complement ] ) AND seen[ key = complement ]-index = 1.
+*
+*              APPEND VALUE #( v1 = iv_nums[ i ] v2 = iv_nums[ j ] v3 = complement  ) TO cv_res.
+*
+*
+*              WHILE ( j + 1  < len AND  iv_nums[ j ] =  iv_nums[ j + 1 ]  ).
+*                j = j + 1.
+*              ENDWHILE.
+*
+*            ENDIF.
+*            APPEND VALUE #( key = iv_nums[ j ] index = i ) TO seen.
+*
+*            j = j + 1.
+*          ENDWHILE.
+
+        ENDIF.
+        i = i + 1.
+      ENDWHILE.
+      SORT cv_res BY v1 v2 v3.
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>three_sum( ).

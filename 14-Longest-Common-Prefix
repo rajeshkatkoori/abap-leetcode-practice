@@ -1,0 +1,68 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: longest_common_prefix_string.
+
+  PRIVATE SECTION..
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method longest_common_prefix_string                                *
+*   Method to find longest_common_prefix_string                        *
+*   LetCode:14. Longest Common Prefix
+*----------------------------------------------------------------------*
+  METHOD longest_common_prefix_string.
+
+    DATA: lt_strings TYPE STANDARD TABLE OF char10,
+          lv_prefix  TYPE char10,
+          lv_string  TYPE char10,
+          lv_str     TYPE char10,
+          lv_i       TYPE i VALUE 2.
+
+    lt_strings = VALUE #( ( 'flower' ) ( 'flow' ) ( 'flight' ) ).
+
+    IF lines( lt_strings ) = 0.
+      lv_prefix = space.
+      RETURN.
+    ENDIF.
+
+    lv_prefix = lt_strings[ 1 ].
+    DATA(lv_pre_len) = strlen( lv_prefix ).
+    WHILE lv_i <= lines( lt_strings ).
+      lv_string = lt_strings[ lv_i ].
+      lv_str = lv_string+0(lv_pre_len).
+      WHILE  lv_str <> lv_prefix .
+        lv_prefix =  substring( val = lv_prefix
+                                off = 0
+                                len = strlen( lv_prefix ) - 1 ).
+        IF lv_prefix IS INITIAL.
+          EXIT.
+        ENDIF.
+        lv_pre_len = strlen( lv_prefix ).
+        lv_str = lv_string+0(lv_pre_len).
+      ENDWHILE.
+      IF lv_prefix IS INITIAL.
+        EXIT.
+      ENDIF.
+      lv_i += 1.
+    ENDWHILE.
+
+    WRITE:/ 'Prefix is: ', lv_prefix.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lv_prefix name = 'Longest Common Prefix' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>longest_common_prefix_string( ).

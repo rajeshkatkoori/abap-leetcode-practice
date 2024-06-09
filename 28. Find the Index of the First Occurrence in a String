@@ -1,0 +1,96 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: string_first_occurrence.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method string_first_Occurrence                                     *
+*   LetCode:28.  Find the Index of the First Occurrence in a String    *
+*----------------------------------------------------------------------*
+  METHOD string_first_occurrence.
+
+    DATA: haystack TYPE string,
+          needle   TYPE string,
+          pos      TYPE i.
+    haystack = 'sadbutsad'.
+    needle = 'sad'.
+
+    DATA(len1) = strlen( haystack ).
+    DATA(len2) = strlen( needle ).
+
+*...//Exit Criteria
+    IF len1 < len2.
+      pos = -1.
+*...//Display the Output
+      cl_demo_output=>display( data = pos name = 'Find the Index of the First Occurrence in a String' ).
+      RETURN.
+    ENDIF.
+
+*...//Sliding Window Approach Last Occurence
+    DATA(len) = len1 - len2.
+    pos = 0.
+    DO len TIMES.
+      IF haystack+pos(len2) = needle.
+        EXIT.
+      ENDIF.
+      pos = pos + 1.
+    ENDDO.
+    IF pos = 0.
+      pos = 1.
+    ELSE.
+      pos = -1.
+    ENDIF.
+*...//Display the Output
+    cl_demo_output=>display( data = pos name = 'Find the Index of the First Occurrence in a String' ).
+
+    DATA(i) = 0.
+*...//Two Pointer Approach1 First Occurane
+    WHILE i <= ( len1 - len2 ).
+      DATA(j) = 0.
+      DATA(n) = i + j.
+      WHILE ( j < len2 AND haystack+n(1) = needle+j(1) ).
+        j = j + 1.
+        n = i + j.
+      ENDWHILE.
+      IF j = len2.
+        pos = i + 1.
+        EXIT.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+    IF pos IS INITIAL.
+      pos = -1.
+    ENDIF.
+*...//Display the Output
+    cl_demo_output=>display( data = pos name = 'Find the Index of the First Occurrence in a String' ).
+
+*...//Sliding Window Approach Last Occurence
+    len = len1 - len2.
+    pos = len.
+    DO len TIMES.
+      IF haystack+pos(len2) = needle.
+        EXIT.
+      ENDIF.
+      pos = pos - 1.
+    ENDDO.
+    IF pos IS INITIAL.
+      pos = -1.
+    ENDIF.
+*...//Display the Output
+    cl_demo_output=>display( data = pos name = 'Find the Index of the First Occurrence in a String' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>string_first_occurrence( ).

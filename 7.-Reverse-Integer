@@ -1,0 +1,79 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: reverse_integer.
+
+  PRIVATE SECTION..
+
+
+ENDCLASS.
+
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Reverse an Integer                                          *
+*  LeetCode #7. Reverse Integer
+*----------------------------------------------------------------------*
+  METHOD reverse_integer.
+
+    DATA: lv_int        TYPE i,
+          lv_reverse    TYPE i,
+          lv_lastno     TYPE i,
+          lv_upperbound TYPE i VALUE 2147483647,
+          lv_lowerbound TYPE i VALUE -2147483648.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_int ).
+    cl_demo_input=>request( ).
+
+    DATA(lv_input) = lv_int.
+
+    WHILE lv_int > 0.
+
+      lv_lastno = lv_int MOD 10.
+
+*..Edge case if Reverse over exxceeds the Integer limit
+      IF lv_reverse > ( lv_upperbound / 10 ) OR ( lv_reverse = ( lv_upperbound / 10 )  AND lv_lastno > 7 ).
+        WRITE:/ 'Exceeding Interger Limit'.
+        CLEAR lv_reverse.
+        EXIT.
+      ENDIF.
+
+      IF lv_reverse < ( lv_lowerbound / 10 ) OR ( lv_reverse = (  lv_lowerbound / 10 ) AND lv_lastno < -8 ) .
+        WRITE:/ 'Exceeding Interger Limit'.
+        CLEAR lv_reverse.
+        EXIT.
+      ENDIF.
+
+      lv_reverse = ( lv_reverse * 10 ) + lv_lastno.
+      lv_int = lv_int / 10.
+
+    ENDWHILE.
+    IF NOT lv_reverse IS INITIAL.
+      WRITE:/ 'Reverse Number of:', lv_input, 'Is: ', lv_reverse.
+    ENDIF.
+
+    WRITE:/.
+
+*...//Approach2
+*...Checking half of the value of input and reverse integer
+    CLEAR lv_reverse.
+    WHILE lv_int > lv_reverse.
+      lv_reverse = ( lv_reverse * 10 ) + lv_int MOD 10.
+      lv_int = lv_int / 10.
+    ENDWHILE.
+    IF lv_int = lv_reverse OR lv_int = lv_reverse / 10.
+      WRITE: lv_input, 'Number is a Palindrome'.
+    ELSE.
+      WRITE:lv_input, 'Number is not a Palindrome'.
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>reverse_integer( ).

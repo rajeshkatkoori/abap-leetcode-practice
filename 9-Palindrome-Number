@@ -1,0 +1,30 @@
+METHOD Palindrom_Number
+
+    DATA:
+      x     TYPE i VALUE 0,
+      n      TYPE i VALUE 0,
+      rev_x  TYPE i VALUE 0,
+      result TYPE abap_boolean VALUE abap_false.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = x).
+    cl_demo_input=>request( ).
+   n = x.
+    IF  n < 0 OR ( ( n <> 0 ) AND ( n MOD 10 )  = 0 ).
+      EXIT.
+    ELSE.
+
+      WHILE n > 0.
+        rev_x = 10 * rev_x + ( n MOD 10 ).
+        n = n DIV 10.
+      ENDWHILE.
+
+      IF x = rev_x.
+    *...//Display the Output
+    cl_demo_output=>display( data = x name = 'Given Number is Palindrom' ).
+      ENDIF.
+
+    ENDIF.
+
+    
+ENDMETHOD.

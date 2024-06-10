@@ -1,0 +1,60 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: squares_of_a_sorted_array.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method Squares_of_a_Sorted_Array                                     *
+*   LetCode:977. Squares of a Sorted Array
+*   Time Complexity: O(Nlog⁡N)
+*----------------------------------------------------------------------*
+  METHOD squares_of_a_sorted_array.
+
+    DATA(lt_input) = VALUE abadr_tab_int4( ( -4 ) ( -1 ) ( 0 ) ( 3 ) ( 10 )  ).
+
+    DATA(lt_nums) = lt_input.
+    DATA(len) = lines( lt_nums ).
+
+*....//Approach 1: Sort with New internal table  O(Nlog⁡N)
+    DATA: lt_temp TYPE abadr_tab_int4.
+
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<fs_num>).
+      lt_temp = VALUE #( BASE lt_temp ( <fs_num> * <fs_num> ) ).
+    ENDLOOP.
+    SORT lt_temp.
+
+*....//Approach 2: Two Pointer  O(N)
+    DATA(left) = 1.
+    DATA(right) = len.
+    DATA(i) = 1.
+    lt_nums = lt_input.
+    CLEAR lt_temp.
+    WHILE i <= len.
+      IF abs( lt_nums[ right ] ) > abs( lt_nums[ left ] ).
+        DATA(square) = lt_nums[ right ].
+        right -= 1.
+      ELSE.
+        square = lt_nums[ left ].
+        left += 1.
+      ENDIF.
+      INSERT ( square * square ) INTO lt_temp INDEX 1.
+      i += 1.
+    ENDWHILE.
+*...//Display the Output
+    cl_demo_output=>display( data = lt_temp name = '977. Squares of a Sorted Array' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>squares_of_a_sorted_array( ).

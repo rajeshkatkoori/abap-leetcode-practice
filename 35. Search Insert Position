@@ -1,0 +1,52 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: search_insert_position.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method Search_Insert_Position                                     *
+*   LetCode:35. Search Insert Position    *
+*----------------------------------------------------------------------*
+  METHOD search_insert_position.
+
+    DATA(lt_nums) = VALUE abadr_tab_int4( ( 1 ) ( 2 ) ( 3 ) ( 4 )  ( 6 ) ( 7 ) ( 8 ) ( 9 ) ( 10 ) ( 11 ) ( 12 ) ( 13 )  ( 14 )  ( 15 ) ).
+    DATA(target) = 5.
+    DATA(pivot) = 0.
+    DATA(left) = 1.
+    DATA(right) = lines( lt_nums ).
+
+
+    WHILE left <= right.
+      pivot = left + ( right - left ) / 2.
+      IF lt_nums[ pivot ] = target.
+        left = pivot.
+        EXIT.
+      ENDIF.
+
+      IF target < lt_nums[ pivot ].
+        right = pivot - 1.
+
+      ELSE.
+        left = pivot + 1.
+      ENDIF.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = left name = 'Search Insert Position' ).
+
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>search_insert_position( ).

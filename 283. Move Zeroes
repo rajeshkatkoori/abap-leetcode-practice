@@ -1,0 +1,97 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: move_zeros.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method move_zeros                                     *
+*   LetCode:283. Move Zeroes    *
+*----------------------------------------------------------------------*
+  METHOD move_zeros.
+
+    DATA(lt_list) = VALUE abadr_tab_int4( ( 0 ) ( 1 ) ( 2 ) ( 0 )  ( 3 ) ( 4 ) ( 0 ) ( 5 ) ).
+    lt_list = value #( ( 0 ) ( 1 ) ( 0 ) ( 3 ) ( 12 ) ).
+*    lt_list = VALUE abadr_tab_int4( ( 0 )  ).
+
+    DATA(lt_nums) = lt_list.
+
+    DATA(reader) = 2.
+    DATA(writer) = 1.
+    DATA(len) = lines( lt_list ).
+
+*...//Bruite force Two pointer - Not Optimal
+    WHILE reader <=  len.
+
+      IF lt_nums[ writer ] = 0.
+        WHILE lt_nums[ reader ] = 0 AND reader <  len.
+          reader += 1.
+        ENDWHILE.
+        DATA(temp) =  lt_nums[ writer ].
+        lt_nums[ writer ] = lt_nums[ reader ].
+        lt_nums[ reader ] = temp.
+      ENDIF.
+
+      reader += 1.
+      writer =  writer + 1.
+
+    ENDWHILE.
+
+*...//Display the Output
+*    cl_demo_output=>display( data = lt_nums name = 'Move Zeros' ).
+
+*...//Two Pointer
+    reader = 1.
+    writer = 1.
+    lt_nums = lt_list.
+    WHILE reader <=  len.
+      IF  lt_nums[ reader ] <> 0.
+        lt_nums[ writer ] = lt_nums[ reader ].
+        writer =  writer + 1.
+      ENDIF.
+      reader += 1.
+    ENDWHILE.
+
+*..Now Fill the rest of the elements with zeros
+    WHILE writer <= len.
+      lt_nums[ writer ] = 0.
+      writer =  writer + 1.
+    ENDWHILE.
+*...//Display the Output
+    cl_demo_output=>display( data = lt_nums name = 'Move Zeros' ).
+
+
+*...//Two Pointer Optimal way -> removed extra while and Swapped Elements instead
+    reader = 1.
+    writer = 1.
+    lt_nums = lt_list.
+
+    WHILE reader <=  len.
+      IF  lt_nums[ reader ] <> 0.
+        temp =  lt_nums[ writer ].
+        lt_nums[ writer ] = lt_nums[ reader ].
+        lt_nums[ reader ] = temp.
+        writer =  writer + 1.
+      ENDIF.
+      reader += 1.
+
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_nums name = 'Move Zeros' ).
+
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>move_zeros( ).

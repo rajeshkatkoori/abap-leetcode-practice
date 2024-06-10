@@ -1,0 +1,41 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: length_last_word.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method length_last_word                                     *
+*   LetCode:58. Length of Last Word
+*----------------------------------------------------------------------*
+  METHOD length_last_word.
+
+    DATA: lv_string  TYPE string,
+          lt_strings TYPE STANDARD TABLE OF string.
+
+    lv_string = '   fly me   to   the moon  '.
+
+    SHIFT lv_string  RIGHT DELETING TRAILING space.
+
+    SPLIT lv_string AT ' ' INTO TABLE lt_strings.
+
+    DATA(result) = strlen( lt_strings[ lines( lt_strings ) ] ).
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = '58. Length of Last Word' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>length_last_word( ).

@@ -1,0 +1,124 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: two_sum.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method array_indices_sum_match_value                                *
+* Leetcode 1. Two Sum                                                  *
+*  Problem: Given an array of integers, return the indices of the
+*  two numbers whose sum is equal to a given target.
+*  Input : arr[ ] = [ 5, 1, 2, 6, 4, 3 } , k = 10
+*  Output: [ 4,5 ] as arr[4] + arr[5] = 10
+*----------------------------------------------------------------------*
+  METHOD two_sum.
+
+    TYPES: tyt_input TYPE TABLE OF i WITH EMPTY KEY,
+           BEGIN OF tys_value,
+             index TYPE i,
+             value TYPE i,
+           END OF tys_value,
+           tyt_index_input TYPE TABLE OF tys_value WITH EMPTY KEY.
+
+    DATA lv_k TYPE i.
+
+*..//Input Array
+    DATA(lt_input) = VALUE tyt_input( ( 7 ) ( 10 ) ( 30 ) ( 9 ) ( 3 ) ).
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_k ).
+    cl_demo_input=>request( ).
+
+*..//Approach1: Brute force Approach
+    DATA(lt_output) = VALUE tyt_input( FOR lv_input1 IN lt_input INDEX INTO lv_index1 TO lines( lt_input ) - 1
+                                     " Inner loop starting from next index
+                                       FOR lv_input2 IN lt_input INDEX INTO lv_index2 FROM lv_index1 + 1
+                                       ( LINES OF COND #( WHEN lv_input1 + lv_input2 =  lv_k
+                                                       THEN VALUE #( ( lv_index1 ) ( lv_index2 ) ) ) )
+                                     ).
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_output name = 'Brute force Approach' ).
+
+
+*..//Approach2: Two Pointer Approach
+*Applying two-pointer technique :
+*1.  Sort the input array( if it’s not sorted already in the problem statement )
+*2.  Initialize start pointer with the first index and end pointer with the last index.
+*3.  Move the left pointer ‘i’ towards right when the sum of Arr[i] and Arr[j] is less than K.
+*4.  Move the right pointer ‘j’ towards the left when the sum of Arr[i] and Arr[j] is greater than K.
+*5.  Return the indices when the sum is found.
+*Consider an array arr[] =  { 5, 1, 2, 6, 4, 3 } and value of k = 10. We need to store the indices of the input array since It will be changed after sorting.
+*
+*.//Prepare new table with indexes
+    DATA(lt_index) = VALUE tyt_index_input( FOR lv_value IN lt_input INDEX INTO lv_index
+                                             ( index = lv_index value = lv_value ) ).
+
+*..//Sort the new table with input values (Keep-in mind that indexes will also be changed “when sorted that’s why we used another internal table to preserve the original indexes
+    SORT lt_index BY value.
+
+*..//Initialize start and end pointers
+    DATA(lv_start) = 1.
+    DATA(lv_end) = lines( lt_input ).
+
+*..//Iteration through the Input array
+    DO lv_end TIMES.
+*..//Calculate the sum of the values at start and end pointers
+      DATA(lv_sum) = lt_index[ lv_start ]-value + lt_index[ lv_end ]-value.
+*..//When sum is more than the target value, move the end pointer to the left
+      IF lv_sum > lv_k.
+        lv_end -= 1.
+*..//When sum is less than the target value, move the start pointer to the right
+      ELSEIF lv_sum < lv_k.
+        lv_start += 1.
+*..//Return the original indexes at start and end pointer when sum equals target
+      ELSE.
+        lt_output = VALUE tyt_input( ( lt_index[ lv_start ]-index ) ( lt_index[ lv_end ]-index ) ).
+        EXIT.
+      ENDIF.
+    ENDDO.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_output name = 'Two Pointer Approach' ).
+
+
+*..//Approach3: Hash Map Approach
+*..//Reading hash table with index
+    DATA(lt_hash) = VALUE tyt_input( ).
+
+    LOOP AT lt_input ASSIGNING FIELD-SYMBOL(<lfs_input>).
+      DATA(lv_tabix) = sy-tabix.
+*..//When current element is not found in hashmap, add it’s complement into hashmap
+      IF ( line_index( lt_hash[ table_line = <lfs_input> ] ) = 0 ).
+        APPEND ( lv_k - <lfs_input> ) TO lt_hash.
+* .   lt_hash = VALUE #( BASE lt_hash ( lv_k – lv_input ) ).
+      ELSE.
+*..// When current element is found in hashmap, append the current index and the index of its complement into result table
+        lt_output = VALUE tyt_input( ( line_index( lt_hash[ table_line = <lfs_input> ] ) ) ( lv_tabix ) ).
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+    IF <lfs_input> IS ASSIGNED.
+      UNASSIGN <lfs_input>.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_output name = 'Hash Map Approach' ).
+
+
+  ENDMETHOD.  " array_indices_sum_match_value
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>two_sum( ).

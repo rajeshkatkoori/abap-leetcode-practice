@@ -1,0 +1,58 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: max_consecutive_ones.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method max_consecutive_ones                                     *
+*   LetCode:485. Max Consecutive Ones
+*----------------------------------------------------------------------*
+  METHOD max_consecutive_ones.
+
+    DATA(lt_nums) = VALUE abadr_tab_int4( ( 1 ) ( 1 ) ( 0 ) ( 1 ) ( 0 ) ( 1 ) ( 1 )  ).
+
+    DATA(count) = 0.
+    DATA(max_count) = 0.
+    DATA(i) = 1.
+
+*...Using While Loop
+    WHILE i <= lines( lt_nums ).
+      IF lt_nums[ i ] = 0.
+        count = 0.
+      ELSE.
+        count = count + 1.
+        max_count = nmax( val1 = count val2 = max_count ).
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+*...Using ABAP Loop
+    count = 0.
+    max_count = 0.
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+      IF <lfs_num> = 0.
+        count = 0.
+      ELSE.
+        count += 1.
+        max_count = nmax( val1 = count val2 = max_count ).
+      ENDIF.
+    ENDLOOP.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = max_count name = '485. Max Consecutive Ones' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>max_consecutive_ones( ).

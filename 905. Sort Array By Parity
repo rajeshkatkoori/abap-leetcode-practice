@@ -1,0 +1,78 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: sort_array_by_parity.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method Sort_Array_By_Parity                                     *
+*   LetCode:905. Sort Array By Parity
+*   Time Complexity: O(Nlog⁡N)
+*----------------------------------------------------------------------*
+  METHOD sort_array_by_parity.
+
+    DATA(lt_input) = VALUE abadr_tab_int4( ( 3 ) ( 1 ) ( 2 ) ( 4 )   ).
+
+    DATA(lt_nums) = lt_input.
+    DATA(len) = lines( lt_nums ).
+
+*...//Approach 1: Two Pointer In-Place
+    DATA(i) = 1.
+    DATA(j) = len.
+
+    WHILE i < j.
+
+*...If ith number is odd and jth number is even then swap
+      IF ( lt_nums[ i ] MOD 2 > lt_nums[ j ] MOD 2 ).
+        DATA(temp) = lt_nums[ i ].
+        lt_nums[ i ] = lt_nums[ j ].
+        lt_nums[ j ] = temp.
+        CLEAR temp.
+      ENDIF.
+
+*...//If Even number then move next
+      IF ( lt_nums[ i ] MOD 2 = 0 ).
+        i += 1.
+      ENDIF.
+
+*...//If Odd number then move back
+      IF ( lt_nums[ j ] MOD 2 = 1 ).
+        j -= 1.
+      ENDIF.
+
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_nums name = '905. Sort Array By Parity' ).
+
+*...//Approach 2: Using additional internal table
+    DATA: lt_temp TYPE   abadr_tab_int4.
+    lt_nums = lt_input.
+
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+
+      IF <lfs_num> MOD 2 = 0.
+        INSERT <lfs_num> INTO lt_temp INDEX 1.
+      ELSE.
+        APPEND <lfs_num> TO lt_temp.
+      ENDIF.
+
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_temp name = '905. Sort Array By Parity' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>sort_array_by_parity( ).

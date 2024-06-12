@@ -1,0 +1,94 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: moving_average_value.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method moving_average_value                                         *
+* Leetcode 346. Moving Average from Data Stream                        *
+*  Problem: Given a stream of integers and a window size,              *
+*  calculate the moving average of all integers in the sliding window. *
+*----------------------------------------------------------------------*
+  METHOD moving_average_value.
+
+
+    DATA: lv_k      TYPE i,
+          queue     TYPE abadr_tab_int4,
+          windowsum TYPE p DECIMALS 5,
+          sum       TYPE i,
+          result    LIKE TABLE OF windowsum.
+
+*..//Input Array
+    DATA(lt_input) = VALUE abadr_tab_int4( ( 3 ) ( 1 ) ( 10 ) ( 3 ) ( 5 ) ).
+
+    DATA(size) = lt_input[ 1 ].
+    CHECK size > 0.
+
+    DATA(len) =  lines( lt_input ).
+    DATA(i) = 2.
+    windowsum = 1.
+    DATA(j) = 2.
+    DATA(count) = 1.
+*...Approach 1: Array
+    WHILE i <= len.
+
+      sum = sum + lt_input[ i ].
+      IF count <= size.
+        windowsum = sum / count.
+        APPEND windowsum TO result.
+        count = count + 1.
+      ELSE.
+        sum = sum - lt_input[ j ].
+        windowsum = sum / size.
+        APPEND windowsum TO result.
+        j = j + 1.
+      ENDIF.
+
+      i = i + 1.
+    ENDWHILE.
+
+*...//Display the Output
+     cl_demo_output=>display( data = result name = '346. Moving Average from Data Stream - Using Array' ).
+
+*...Approach : Queue Model
+    CLEAR result.
+    i = 2.
+    j = 2.
+    DATA(windowsize) = 1.
+    WHILE i <= len.
+      count = sy-index.
+      APPEND lt_input[ i ] TO queue.
+
+      IF count <= size.
+        windowsize = count.
+      ELSE.
+        windowsize = size.
+        DELETE queue INDEX 1.
+      ENDIF.
+
+      sum =  REDUCE i( INIT s = 0 FOR lv_num IN queue NEXT s = s + lv_num ).
+      windowsum = sum / windowsize.
+      APPEND windowsum TO result.
+      i = i + 1.
+    ENDWHILE.
+
+
+*...//Display the Output
+     cl_demo_output=>display( data = result name = '346. Moving Average from Data Stream - Queue Approach' ).
+
+  ENDMETHOD.  " array_indices_sum_match_value
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>moving_average_value( ).

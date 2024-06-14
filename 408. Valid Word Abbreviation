@@ -106,7 +106,7 @@ CLASS zcl_utility IMPLEMENTATION.
 
 
 *...//Display the Output
-    cl_demo_output=>display( data = result   name = '121. Best Time to Buy and Sell Stock' ).
+    cl_demo_output=>display( data = result   name = '408. Valid Word Abbreviation' ).
 
   ENDMETHOD.  "Valid_Word_Abbreviation
 

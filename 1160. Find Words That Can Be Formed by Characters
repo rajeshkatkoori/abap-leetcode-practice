@@ -1,0 +1,89 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: find_words_from_char.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method find_words_from_char                                         *
+* Leetcode 1160. Find Words That Can Be Formed by Characters           *
+*You are given an array of strings words and a string chars.
+*A string is good if it can be formed by characters from chars (each character can only be used once).
+*Return the sum of lengths of all good strings in words.
+*----------------------------------------------------------------------*
+  METHOD find_words_from_char.
+
+    TYPES: tt_words TYPE TABLE OF string WITH EMPTY KEY,
+           tt_chars TYPE TABLE OF char1 WITH EMPTY KEY,
+           BEGIN OF tyt_hash,
+             char(1) TYPE c,
+             value   TYPE i,
+           END OF tyt_hash.
+
+    DATA: lt_char_val  TYPE HASHED TABLE OF tyt_hash WITH UNIQUE KEY char,
+          lt_char_temp TYPE HASHED TABLE OF tyt_hash WITH UNIQUE KEY char,
+          ls_char_val  TYPE tyt_hash,
+          result       TYPE i.
+
+*..//Input Data
+    DATA(lt_words) = VALUE tt_words(  ( `cat` )  ( `bt` )  ( `hat` )  ( `tree` ) ).
+     DATA(lt_chars) = VALUE tt_chars( ( 'a' ) ( 't' ) ( 'a' ) ( 'c' ) ( 'h' ) ).
+
+**..//Input Data
+*    lt_words = VALUE tt_words( ( `coding` ) ( `apple` ) ( `google` ) ( `rocket` ) ( `pop` ) ).
+*    lt_chars = VALUE tt_chars( ( 'a' ) ( 'e' ) ( 'g' ) ( 'o' ) ( 'p' ) ( 'o' ) ( 'l' ) ( 'p' ) ( 'e' ) ( 'g' ) ).
+*
+*...//Populate the Hash Table with Initial value
+    LOOP AT lt_chars ASSIGNING FIELD-SYMBOL(<lfs_char>).
+      READ TABLE lt_char_val ASSIGNING FIELD-SYMBOL(<lfs_char_val>) WITH KEY char = <lfs_char>.
+      IF sy-subrc = 0.
+        <lfs_char_val>-value += 1.
+        UNASSIGN <lfs_char_val>.
+      ELSE.
+        ls_char_val-char = <lfs_char>.
+        ls_char_val-value = 1.
+        INSERT ls_char_val INTO TABLE lt_char_val.
+        CLEAR ls_char_val.
+      ENDIF.
+    ENDLOOP.
+
+*...//Main Process
+    LOOP AT lt_words ASSIGNING FIELD-SYMBOL(<lfs_word>).
+      lt_char_temp = lt_char_val.
+      DATA(lv_count) = 0.
+      DATA(j) = 0.
+      WHILE j < strlen( <lfs_word> ).
+        READ TABLE lt_char_temp ASSIGNING <lfs_char_val> WITH KEY char = <lfs_word>+j(1).
+        IF sy-subrc = 0 AND <lfs_char_val>-value > 0.
+*...//If Char of word found in Hash Map then reduce the count and increment the match counter
+          lv_count += 1.
+          <lfs_char_val>-value -= 1.
+        ELSE.
+          EXIT.
+        ENDIF.
+        j = j + 1.
+      ENDWHILE.
+*...//If Match counter value is equal to Strlen of Word then its success case
+      IF lv_count = strlen( <lfs_word> ).
+        result += strlen( <lfs_word> ).
+        WRITE:/  <lfs_word> .
+      ENDIF.
+    ENDLOOP.
+
+    WRITE:/ 'Total matched words length: ', result.
+
+  ENDMETHOD.  " find_words_from_char
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>find_words_from_char( ).

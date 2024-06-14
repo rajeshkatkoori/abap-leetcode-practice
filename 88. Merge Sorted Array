@@ -1,0 +1,61 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: merge_sorted_array.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method merge_sorted_array                                         *
+*  Leetcode 88. Merge Sorted Arrays           *
+*----------------------------------------------------------------------*
+  METHOD merge_sorted_array.
+
+    TYPES: tt_nums TYPE TABLE OF i WITH EMPTY KEY.
+
+*    DATA(num1) = VALUE tt_nums( ( 1 ) ( 2 ) ( 4 ) ( 0 ) ( 0 ) ( 0 ) ).
+*    DATA(num2) = VALUE tt_nums( ( 2 ) ( 5 ) ( 6 ) ).
+
+*    DATA(num1) = VALUE tt_nums( ( 4 ) ( 5 ) ( 6 ) ( 0 ) ( 0 ) ( 0 ) ).
+*    DATA(num2) = VALUE tt_nums( ( 1 ) ( 2 ) ( 3 ) ).
+
+    DATA(num1) = VALUE tt_nums( ( 1 ) ( 2 ) ( 3 ) ( 0 ) ( 0 ) ( 0 ) ).
+    DATA(num2) = VALUE tt_nums( ( 4 ) ( 5 ) ( 6 ) ).
+
+*...//Three Pointer Approach
+    DATA(i) = lines( num1 ).
+    DATA(n) = lines( num2 ).
+    DATA(m) = n.
+    WHILE m > 0 AND n > 0.
+      IF num1[ m ] > num2[ n ].
+        num1[ i ] = num1[ m ].
+        i = i - 1.
+        m = m - 1.
+      ELSE.
+        num1[ i ] = num2[ n ].
+        i = i - 1.
+        n = n - 1.
+      ENDIF.
+    ENDWHILE.
+    WHILE n > 0.
+      num1[ i ] = num2[ n ].
+      i = i - 1.
+      n = n - 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = num1 name = '88. Merge Sorted Arrays' ).
+
+  ENDMETHOD.  " merge_sorted_array
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>merge_sorted_array( ).

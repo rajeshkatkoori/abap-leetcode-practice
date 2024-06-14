@@ -1,0 +1,118 @@
+A string can be abbreviated by replacing any number of non-adjacent, non-empty substrings with their lengths. The lengths should not have leading zeros.
+
+For example, a string such as "substitution" could be abbreviated as (but not limited to):
+
+"s10n" ("s ubstitutio n")
+"sub4u4" ("sub stit u tion")
+"12" ("substitution")
+"su3i1u2on" ("su bst i t u ti on")
+"substitution" (no substrings replaced)
+The following are not valid abbreviations:
+
+"s55n" ("s ubsti tutio n", the replaced substrings are adjacent)
+"s010n" (has leading zeros)
+"s0ubstitution" (replaces an empty substring)
+Given a string word and an abbreviation abbr, return whether the string matches the given abbreviation.
+
+A substring is a contiguous non-empty sequence of characters within a string.
+
+
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS:valid_word_abbreviation.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Valid_Word_Abbreviation                                      *
+*  Leetcode Code 408. Valid Word Abbreviation                          *
+*----------------------------------------------------------------------*
+  METHOD valid_word_abbreviation.
+
+    DATA len(10) TYPE n.
+
+    CONSTANTS: c_numeric TYPE string VALUE '0123456789'.
+
+
+    DATA(word) = CONV string( 'internationalization' ).
+    DATA(abbr) = CONV string( 'i12iz4n' ).
+
+*    DATA(word) = CONV string( 'apple' ).
+*    DATA(abbr) = CONV string( 'a2e' ).
+
+*    DATA(word) = CONV string( 'substitution' ).
+*    DATA(abbr) = CONV string( 's10n' ).
+*    DATA(abbr) = CONV string( 'sub4u4' ).
+*    DATA(abbr) = CONV string( '12' ).
+*    DATA(abbr) = CONV string( 'su3i1u2on' ).
+*    DATA(abbr) = CONV string( 'substitution' ).
+
+    TRANSLATE word TO UPPER CASE.
+    TRANSLATE abbr TO UPPER CASE.
+
+    DATA(m) = strlen( word ).
+    DATA(n) = strlen( abbr ).
+
+*...Edge Cases
+    IF  n > m.
+      DATA(result) = 'False'.
+    ELSEIF abbr = word.
+      result = 'True'.
+    ELSE.
+*...Normal Case
+      DATA(i) = 0.
+      DATA(j) = 0.
+
+      WHILE i < m AND j < n.
+
+        IF word+i(1) = abbr+j(1).
+          i = i + 1.
+          j = j + 1.
+          CONTINUE.
+        ELSEIF  abbr+j(1) = '0'.
+          result = 'False'.
+          EXIT.
+
+        ELSEIF abbr+j(1) CO c_numeric.
+          WHILE j < n AND abbr+j(1) CO c_numeric.
+            len = len && abbr+j(1).
+            j = j + 1.
+          ENDWHILE.
+          DATA(k) = CONV i( len ).
+
+          i = i + k.
+          CLEAR: k, len.
+        ELSE.
+          result = 'False'.
+          EXIT.
+        ENDIF.
+
+        IF  i = m AND j = n.
+          result = 'True'.
+        ELSE.
+          result = 'False'.
+        ENDIF.
+      ENDWHILE.
+
+    ENDIF.
+
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '121. Best Time to Buy and Sell Stock' ).
+
+  ENDMETHOD.  "Valid_Word_Abbreviation
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>valid_word_abbreviation( ).

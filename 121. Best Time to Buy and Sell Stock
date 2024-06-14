@@ -1,0 +1,56 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS:stock_buysell_profit.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method stock_buysell_profit                                          *
+*  Leetcode Code 121. Best Time to Buy and Sell Stock                  *
+*----------------------------------------------------------------------*
+  METHOD stock_buysell_profit.
+
+    DATA: lt_input TYPE STANDARD TABLE OF i WITH EMPTY KEY.
+
+    lt_input = VALUE #( ( 7 ) ( 1 ) ( 5 ) ( 3 ) ( 6 ) ( 4 ) ).
+
+    lt_input = VALUE #( ( 7 ) ( 6 ) ( 4 ) ( 3 ) ( 1 ) ).
+
+*...Approach1 Brute Force O(n2)
+    DATA(lv_min_price) = lt_input[ 1 ].
+    DATA(rv_max_profit) = 0.
+    LOOP AT lt_input ASSIGNING FIELD-SYMBOL(<fs_input>).
+      DATA(i) = sy-tabix.
+      LOOP AT lt_input ASSIGNING FIELD-SYMBOL(<fs_input2>) FROM i + 1.
+        rv_max_profit = nmax( val1 = rv_max_profit val2 = <fs_input2> - <fs_input> ).
+      ENDLOOP.
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = rv_max_profit   name = '121. Best Time to Buy and Sell Stock' ).
+
+
+*...//Approach2 One Pass O(n) Best Approach
+    lv_min_price = lt_input[ 1 ].
+    rv_max_profit = 0.
+    LOOP AT lt_input ASSIGNING <fs_input>.
+      lv_min_price = nmin( val1 = lv_min_price val2 = <fs_input> ).
+      rv_max_profit = nmax( val1 = rv_max_profit val2 = <fs_input> - lv_min_price ).
+    ENDLOOP.
+*...//Display the Output
+    cl_demo_output=>display( data = rv_max_profit   name = '121. Best Time to Buy and Sell Stock' ).
+
+  ENDMETHOD.  "stock_buysell_profit
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>stock_buysell_profit( ).

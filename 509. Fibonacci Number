@@ -1,0 +1,123 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    TYPES: BEGIN OF ty_hash,
+             key   TYPE i,
+             value TYPE i,
+           END OF ty_hash,
+           tt_hash TYPE TABLE OF ty_hash WITH EMPTY KEY.
+
+    CLASS-METHODS:fibonacci_number .
+
+  PRIVATE SECTION.
+
+    CLASS-METHODS: fibonacci_recursion
+      IMPORTING !num          TYPE i
+      RETURNING VALUE(rv_res) TYPE i,
+
+      fibonacci_bottomup
+        IMPORTING !num          TYPE i
+        RETURNING VALUE(rv_res) TYPE i,
+
+      fibonacci_topdown
+        IMPORTING !num          TYPE i
+        RETURNING VALUE(rv_res) TYPE i.
+
+    CLASS-DATA: gt_hash TYPE tt_hash.
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Fibonacci_Number                                             *
+*  Leetcode Code 509. Fibonacci Number                                 *
+*  Time Complexity O(2 power N)
+*----------------------------------------------------------------------*
+  METHOD fibonacci_number.
+
+    DATA(n) = 4.
+
+*...//Approach1: Recursion
+    DATA(result) = fibonacci_recursion( n ).
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '509. Fibonacci Number-Recursion' ).
+
+
+*...//Approach 2: Bottom-Up Approach using Tabulation
+    result = fibonacci_bottomup( n ).
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '509. Fibonacci Number-Bottom-Up Approach using Tabulation' ).
+
+
+*...//Approach 3: Top-Down Approach using Memoization
+    CLEAR gt_hash.
+    gt_hash = VALUE #( ( key = 0 value = 0 ) ( key = 1 value = 1 ) ).
+    result = fibonacci_topdown( n ).
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '509. Fibonacci Number-Top-Down Approach using Memoization' ).
+
+
+  ENDMETHOD.  "Fibonacci_Number
+*----------------------------------------------------------------------*
+*  Method fibonacci_bottomup                                          *
+*  Leetcode Code 509. Fibonacci Number using Bottom-Up Approach using Tabulation *
+*----------------------------------------------------------------------*
+  METHOD fibonacci_bottomup.
+
+    TYPES: tt_num TYPE TABLE OF i WITH EMPTY KEY.
+    DATA lt_cache TYPE tt_num.
+
+    IF num <= 1.
+      rv_res  = num.
+    ELSE.
+      lt_cache = VALUE #( ( 0 ) ( 1 ) ).
+      DATA(i) = 3.
+      WHILE i <= num + 1.
+        lt_cache = VALUE #( BASE lt_cache ( lt_cache[ i - 1 ] + lt_cache[ i - 2 ] ) ).
+        i = i + 1.
+      ENDWHILE.
+      rv_res = lt_cache[ num + 1 ].
+    ENDIF.
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method fibonacci_recursion                                          *
+*  Leetcode Code 509. Fibonacci Number  using Recursion                *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD fibonacci_recursion.
+    IF num <= 1.
+      rv_res = num.
+    ELSE.
+      rv_res = fibonacci_recursion( num - 1 ) + fibonacci_recursion( num - 2 ).
+    ENDIF.
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method fibonacci_topdown                                            *
+*  Leetcode Code 509. Fibonacci Number  using TopDown Memorization     *
+*----------------------------------------------------------------------*
+  METHOD fibonacci_topdown.
+
+    IF ( line_exists( gt_hash[ key = num ] ) ).
+      rv_res = gt_hash[ key = num ]-value.
+    ELSE.
+
+      DATA(sum) = fibonacci_topdown( num - 1 ) + fibonacci_topdown( num - 2 ).
+      gt_hash = VALUE #( BASE gt_hash ( key = num value = sum ) ).
+      rv_res =  gt_hash[ key = num ]-value.
+
+    ENDIF.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>fibonacci_number( ).

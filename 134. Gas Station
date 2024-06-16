@@ -1,0 +1,112 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: gas_station .
+
+  PRIVATE SECTION.
+
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method gas_station                                                  *
+*  Leetcode Code 134. Gas Station                                      *
+*  Time Complexity O(LogN)
+*----------------------------------------------------------------------*
+  METHOD gas_station.
+
+    DATA(lt_gas)  = VALUE abadr_tab_int4( ( 1 ) ( 2 ) ( 3 ) ( 4 ) ( 5 ) ).
+    DATA(lt_cost) = VALUE abadr_tab_int4( ( 3 ) ( 4 ) ( 5 ) ( 1 ) ( 2 ) ).
+
+    DATA(len) = lines( lt_gas ).
+
+
+*...//Approach 1 -> Considering Gas Left at each Station
+    IF len = 1 AND lt_gas[ 1 ] >= lt_cost[ 1 ].
+      DATA(result) = 0.
+    ELSE.
+
+      DATA(i) = 1.
+
+      WHILE i <= len.
+
+        IF lt_gas[ i ] <= lt_cost[ i ].
+*    //not a good starting point. move on.
+          i = i + 1.
+          CONTINUE.
+        ELSE.
+          DATA(start) = i.
+          DATA(gasleft) = 0.
+          DATA(noroute) = abap_false.
+          DATA(j) = 1.
+          WHILE j <= len.
+
+            gasleft += lt_gas[ start ] - lt_cost[ start ].
+            IF ( gasleft < 0 ).
+              noroute = abap_true.
+              EXIT.
+            ENDIF.
+            start += 1.
+            IF start > len.
+              start = 1.
+            ENDIF.
+
+            j = j + 1.
+          ENDWHILE.
+
+          IF noroute IS INITIAL.
+            result = i.
+            EXIT.
+          ENDIF.
+
+        ENDIF.
+
+        i = i + 1.
+
+      ENDWHILE.
+
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '134. Gas Station' ).
+
+
+*...//Approach 2 -> Considering Valley -> Best Approach
+    DATA(currgain) = 0.
+    DATA(totalgain) = 0.
+    DATA(answer) = 0.
+    i = 1.
+    result = 0.
+    WHILE i <= len.
+      totalgain += lt_gas[ i ] - lt_cost[ i ].
+      currgain += lt_gas[ i ] - lt_cost[ i ].
+*           // If we meet a "valley", start over from the next station
+*            // with 0 initial gas.
+      IF ( currgain < 0 ).
+        answer = i + 1.
+        currgain = 0.
+      ENDIF.
+
+      i = i + 1.
+    ENDWHILE.
+    IF totalgain >= 0.
+      result = answer.
+    ELSE.
+      result =  -1.
+    ENDIF.
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '134. Gas Station' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>gas_station( ).

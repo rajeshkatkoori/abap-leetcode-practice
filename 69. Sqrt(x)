@@ -1,0 +1,61 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: square_root .
+
+  PRIVATE SECTION.
+
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method square_root                                             *
+*  Leetcode Code 69. Sqrt(x)                                 *
+*  Time Complexity O(LogN)
+*----------------------------------------------------------------------*
+  METHOD square_root.
+
+    DATA num TYPE p DECIMALS 4.
+
+    DATA(x) = 8.
+
+*...//Binary Search Approach
+    IF x < 2.
+      DATA(result) = x.
+    ELSE.
+      DATA(left) = 2.
+      DATA(right) = x / 2.
+
+      WHILE left <= right .
+        DATA(pivot) = left + ( right - left ) / 2.
+        num = pivot * pivot.
+        IF num > x.
+          right = pivot - 1.
+        ELSEIF num < x.
+          left = pivot + 1.
+        ELSE.
+          result = pivot.
+          EXIT.
+        ENDIF.
+      ENDWHILE.
+      IF result IS INITIAL.
+        result = right.
+      ENDIF.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '69. Sqrt(x) - Binary Search' ).
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>square_root( ).

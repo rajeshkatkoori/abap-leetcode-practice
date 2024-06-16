@@ -1,0 +1,94 @@
+*387. First Unique Character in a String
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: first_unique_character_in_str .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method First_Unique_Character_in_Str                                *
+*  Leetcode Code 387. First Unique Character in a String               *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD first_unique_character_in_str.
+
+    TYPES: BEGIN OF ty_hash,
+             key   TYPE char1,
+             value TYPE i,
+           END OF ty_hash,
+           tt_hash TYPE TABLE OF ty_hash WITH EMPTY KEY.
+    DATA: lt_hash TYPE tt_hash,
+          result  TYPE i.
+
+    DATA(lv_string) = 'loveleetcode'.
+*    DATA(lv_string) = 'leetcode'.
+
+    DATA(len) = strlen( lv_string ).
+*...//Approach 1: Using Hash Map
+*...//Time Complexity O(N)
+    DATA(i) = 0.
+*...//Building Hash Map
+    WHILE i < len.
+
+      READ TABLE lt_hash ASSIGNING FIELD-SYMBOL(<lfs_hash>) WITH KEY key = lv_string+i(1).
+      IF sy-subrc = 0.
+        <lfs_hash>-value += 1.
+      ELSE.
+        APPEND VALUE #( key = lv_string+i(1) value = 1 ) TO lt_hash.
+      ENDIF.
+
+      i = i + 1.
+    ENDWHILE.
+*..//Main Processing
+    i = 0.
+    WHILE i < len.
+      IF line_exists( lt_hash[ key = lv_string+i(1) value = 1 ] ).
+        result = i + 1.
+        EXIT.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '387. First Unique Character in a String - Hash Map' ).
+
+
+*...//Approach 2: Brute Force
+*...//Approach 1: Using Hash Map
+*...//Time Complexity O(N2)
+    i = 0.
+
+    WHILE i < len.
+      DATA(j) = i + 1.
+
+      WHILE j < len.
+        IF lv_string+j(1) = lv_string+i(1).
+          EXIT.
+        ENDIF.
+        j = j + 1.
+      ENDWHILE.
+      IF j = len.
+        result = i + 1.
+        EXIT.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '387. First Unique Character in a String - Brute Force' ).
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>first_unique_character_in_str( ).

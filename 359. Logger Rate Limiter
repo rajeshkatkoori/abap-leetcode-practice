@@ -1,0 +1,73 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: logger_rate_limiter .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Logger_Rate_Limiter                                   *
+*  Leetcode Code 359. Logger Rate Limiter                       *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD logger_rate_limiter.
+
+    TYPES: BEGIN OF ty_result,
+             log       TYPE string,
+             msg       TYPE string,
+             timestamp TYPE i,
+           END OF ty_result,
+           tt_result TYPE TABLE OF ty_result WITH EMPTY KEY.
+
+    TYPES: BEGIN OF ty_hash,
+             msg       TYPE string,
+             timestamp TYPE i,
+           END OF ty_hash,
+           tt_hash TYPE TABLE OF ty_hash WITH EMPTY KEY.
+    DATA: lt_hash   TYPE tt_hash,
+          lt_msgs   TYPE tt_hash,
+          lt_result TYPE tt_result.
+
+    DATA(timeout) = 10.
+    lt_msgs = VALUE #( ( msg = 'foo' timestamp = 1 )  ( msg = 'bar' timestamp = 2 )
+                        ( msg = 'foo' timestamp = 3 )  ( msg = 'bar' timestamp = 8 )
+                        ( msg = 'foo' timestamp = 10 ) ( msg = 'foo' timestamp = 11 ) ).
+
+*...//Approach1:Hash
+    LOOP AT lt_msgs ASSIGNING FIELD-SYMBOL(<lfs_msg>).
+
+      READ TABLE lt_hash ASSIGNING FIELD-SYMBOL(<lfs_hash>) WITH KEY msg = <lfs_msg>-msg.
+      IF sy-subrc = 0.
+        IF <lfs_msg>-timestamp >= <lfs_hash>-timestamp.
+          <lfs_msg>-timestamp = <lfs_msg>-timestamp + timeout.
+          APPEND VALUE #( log = 'True' msg = <lfs_msg>-msg timestamp = <lfs_msg>-timestamp  ) TO lt_result.
+        ELSE.
+          APPEND VALUE #( log = 'False' msg = <lfs_msg>-msg timestamp = <lfs_msg>-timestamp  ) TO lt_result.
+        ENDIF.
+      ELSE.
+        <lfs_msg>-timestamp = <lfs_msg>-timestamp + timeout.
+        APPEND <lfs_msg> TO lt_hash.
+        APPEND VALUE #( log = 'True' msg = <lfs_msg>-msg timestamp = <lfs_msg>-timestamp  ) TO lt_result.
+      ENDIF.
+
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_result   name = '359. Logger Rate Limiter - Hash Table' ).
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>logger_rate_limiter( ).

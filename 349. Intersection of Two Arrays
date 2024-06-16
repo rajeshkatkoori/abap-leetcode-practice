@@ -1,0 +1,68 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: intersection_of_two_arrays .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Intersection_of_Two_Arrays                                   *
+*  Leetcode Code 349. Intersection of Two Arrays                       *
+*  Time Complexity O(NLOGN)
+*----------------------------------------------------------------------*
+  METHOD intersection_of_two_arrays.
+
+    TYPES: BEGIN OF ty_hash,
+             key TYPE i,
+           END OF ty_hash,
+           tt_hash TYPE TABLE OF ty_hash WITH EMPTY KEY.
+    DATA: lt_hash TYPE tt_hash,
+          result  TYPE i.
+
+*DATA(lt_nums1) = VALUE abadr_tab_int4( ( 1 ) ( 2 ) ( 2 ) ( 1 ) ).
+*DATA(lt_nums2) = VALUE abadr_tab_int4( ( 2 ) ( 2 ) ).
+*
+    DATA(lt_nums1) = VALUE abadr_tab_int4( ( 4 ) ( 9 ) ( 5 ) ).
+    DATA(lt_nums2) = VALUE abadr_tab_int4( ( 9 ) ( 4 ) ( 9 ) ( 8 ) ( 4 ) ).
+
+*...//Approach1: SORT and Two Pointers
+    SORT: lt_nums1, lt_nums2 .
+    DATA(len1) = lines( lt_nums1 ).
+    DATA(len2) = lines( lt_nums2 ) .
+
+    DATA(p1) = 1.
+    DATA(p2) = 1.
+    WHILE p1 <= len1 AND p2 <= len2.
+      IF lt_nums1[ p1 ] = lt_nums2[ p2 ].
+        IF NOT line_exists( lt_hash[ key = lt_nums1[ p1 ] ] ).
+          APPEND VALUE #( key = lt_nums1[ p1 ] ) TO lt_hash.
+        ENDIF.
+        p1 += 1.
+        p2 += 1.
+      ELSEIF lt_nums1[ p1 ] < lt_nums2[ p2 ].
+        p1 += 1.
+      ELSE.
+        p2 += 1.
+      ENDIF.
+    ENDWHILE.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_hash   name = '349. Intersection of Two Arrays - SORT - Two Pointer' ).
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>intersection_of_two_arrays( ).

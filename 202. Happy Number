@@ -1,0 +1,114 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: happy_number .
+
+  PRIVATE SECTION.
+    CLASS-METHODS: getnext
+      IMPORTING !num          TYPE i
+      RETURNING VALUE(rv_sum) TYPE i.
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*  Method GetNext                                                      *
+*  Leetcode Code 202. Happy Number                                     *
+*  This method will give the next Sum of all digit squares
+*----------------------------------------------------------------------*
+  METHOD getnext.
+
+    DATA(n) = num.
+    WHILE  n > 0.
+      DATA(d) = n MOD 10.
+      n = n DIV 10.
+      rv_sum += d * d.
+    ENDWHILE.
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method Happy_Number                                                 *
+*  Leetcode Code 202. Happy Number                                     *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD happy_number.
+
+    TYPES: BEGIN OF yt_seen,
+             key TYPE i,
+           END OF yt_seen,
+           tt_seen TYPE TABLE OF yt_seen WITH EMPTY KEY.
+
+    DATA: result   TYPE string,
+          lv_input TYPE i,
+          lt_seen  TYPE tt_seen.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_input ).
+    cl_demo_input=>request( ).
+
+    DATA(lv_num) = lv_input.
+*...//Approach 1: Detect Cycles with a HashSet
+*...//Time Complexity O(logn)
+    WHILE ( lv_num <> 1 AND NOT line_exists( lt_seen[ key = lv_num ] ) ).
+
+      APPEND VALUE #( key = lv_num ) TO lt_seen.
+      lv_num =  getnext( lv_num ).
+    ENDWHILE.
+    IF lv_num = 1.
+      result = |TRUE|.
+    ELSE.
+      result = |FALSE|.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '202. Happy Number - Hash Table' ).
+
+*...//Approach 2: Floyd's Cycle-Finding Algorithm
+*...//Time Complexity O(logn)
+*...//Using SlowRunner and FastRunner
+    lv_num = lv_input.
+    CLEAR result.
+    DATA(slowrunner) = lv_num.
+    DATA(fastrunner) = getnext( lv_num ).
+    WHILE ( fastrunner <> 1 AND slowrunner <> fastrunner ).
+      slowrunner = getnext( slowrunner ).
+      fastrunner = getnext( getnext( fastrunner ) ).
+    ENDWHILE.
+
+    IF fastrunner = 1.
+      result = |TRUE|.
+    ELSE.
+      result = |FALSE|.
+    ENDIF.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '202. Happy Number - Floyds Cycle-Finding Algorithm' ).
+
+
+*...//Approach 3: Hardcoding the Only Cycle
+*...//Time Complexity O(logn)
+*This approach was based on the idea that all numbers either end at 1 or enter the cycle {4, 16, 37, 58, 89, 145, 42, 20}, wrapping around it infinitely.
+*An alternative approach would be to recognise that all numbers will either end at 1, or go past 4 (a member of the cycle) at some point.
+* Therefore, instead of hardcoding the entire cycle, we can just hardcode the 4.
+    lv_num = lv_input.
+    CLEAR result.
+    WHILE ( lv_num <> 1 AND lv_num <> 4  ).
+      lv_num = getnext( lv_num ).
+    ENDWHILE.
+    IF lv_num = 1.
+      result = |TRUE|.
+    ELSE.
+      result = |FALSE|.
+    ENDIF.
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '202. Happy Number - Hardcoding the Only Cycle' ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>happy_number( ).

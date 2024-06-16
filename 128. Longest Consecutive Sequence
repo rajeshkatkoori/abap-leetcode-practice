@@ -1,0 +1,108 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: longest_consecutive_sequence .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Longest_Consecutive_Sequence                                             *
+*  Leetcode Code 128. Longest Consecutive Sequence                                 *
+*  Time Complexity O(LogN)
+*----------------------------------------------------------------------*
+  METHOD longest_consecutive_sequence.
+
+*    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 0 ) ( 3 ) ( 7 ) ( 2 ) ( 5 ) ( 8 ) ( 4 ) ( 6 ) ( 0 ) ( 1 ) ).
+*    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 100 ) ( 4 ) ( 200 ) ( 1 ) ( 3 ) ( 2 ) ).
+*    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 1 ) ( 4 ) ( 2 ) ( 1 )  ( 2 ) ).
+*     DATA(lt_nums)  = VALUE abadr_tab_int4( ( 1 ) ).
+    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 1 ) ( 15 ) ( 16 ) ( 17 ) ( 51 ) ( 52 ) ( 71 ) ( 72 ) ).
+
+    DATA(len) = lines( lt_nums ).
+
+
+
+*...Approach 1: Brute Force
+*  Time Complexity O(N3)
+    DATA(longeststreak) = 0.
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+      DATA(currentnum) = <lfs_num>.
+      DATA(currentstreak) = 1.
+
+      DO.
+        currentnum += 1.
+        IF line_exists( lt_nums[ table_line = currentnum ] ).
+          currentstreak += 1.
+        ELSE.
+          EXIT.
+        ENDIF.
+      ENDDO.
+      longeststreak = nmax( val1 = longeststreak val2 = currentstreak ).
+
+    ENDLOOP.
+*...//Display the Output
+    cl_demo_output=>display( data = longeststreak   name = '128. Longest Consecutive Sequence - Brute Force' ).
+
+
+*...Approach 2: Sorting
+*...Time Complexity O(NLogN)
+    DATA(lt_input) = lt_nums.
+    SORT lt_input.
+    currentstreak = 1.
+    longeststreak = 1.
+    DATA(i) = 2.
+    WHILE i <= len.
+      IF lt_input[ i ] <> lt_input[ i - 1 ].
+        IF lt_input[ i ] - lt_input[ i - 1 ] = 1.
+          currentstreak += 1.
+        ELSE.
+          longeststreak = nmax( val1 = longeststreak val2 = currentstreak ).
+          currentstreak = 1.
+        ENDIF.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+    longeststreak = nmax( val1 = longeststreak val2 = currentstreak ).
+*...//Display the Output
+    cl_demo_output=>display( data = longeststreak   name = '128. Longest Consecutive Sequence - Sorting' ).
+
+
+
+*...Approach 3: Brute Force - Optimized
+*  Time Complexity O(N)
+    longeststreak = 0.
+    LOOP AT lt_nums ASSIGNING <lfs_num>.
+      IF NOT  line_exists( lt_nums[ table_line = <lfs_num> - 1 ] ).
+        currentnum = <lfs_num>.
+        currentstreak = 1.
+
+        DO.
+          currentnum += 1.
+          IF line_exists( lt_nums[ table_line = currentnum ] ).
+            currentstreak += 1.
+          ELSE.
+            EXIT.
+          ENDIF.
+        ENDDO.
+        longeststreak = nmax( val1 = longeststreak val2 = currentstreak ).
+      ENDIF.
+    ENDLOOP.
+*...//Display the Output
+    cl_demo_output=>display( data = longeststreak   name = '128. Longest Consecutive Sequence - Brute Force Optimized' ).
+
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>longest_consecutive_sequence( ).

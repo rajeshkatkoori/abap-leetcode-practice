@@ -1,0 +1,179 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    TYPES: tt_num TYPE TABLE OF i WITH EMPTY KEY.
+
+    CLASS-METHODS: climbing_stairs .
+
+  PRIVATE SECTION.
+
+    CLASS-METHODS: climbstairs_recursion
+      IMPORTING
+                !i            TYPE i
+                !num          TYPE i
+      RETURNING VALUE(rv_res) TYPE i,
+      climbstairs_recursion_memory
+        IMPORTING
+                  !i            TYPE i
+                  !num          TYPE i
+        RETURNING VALUE(rv_res) TYPE i,
+      climbstairs_dp
+        IMPORTING
+                  !num          TYPE i
+        RETURNING VALUE(rv_res) TYPE i,
+      climbstairs_fibonacci
+        IMPORTING !num          TYPE i
+        RETURNING VALUE(rv_res) TYPE i.
+
+    CLASS-DATA:
+                gt_memo TYPE tt_num.
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Climbing_Stairs                                             *
+*  Leetcode Code 70. Climbing Stairs                                 *
+*  Time Complexity O(2 power N)
+*----------------------------------------------------------------------*
+  METHOD climbing_stairs.
+
+    DATA(n) = 2.
+
+
+*...//Approach1: Brute Force Recursion
+    DATA(result) = climbstairs_recursion( i = 0 num = n ).
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '70. Climbing Stairs-Recursion' ).
+
+
+*...//Approach 2: Recursion with Memoization
+    DO n + 1 TIMES.
+      APPEND 0 TO gt_memo.
+    ENDDO.
+    result = climbstairs_recursion_memory( i = 1 num = n + 1 ).
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '70. Climbing Stairs-Recursion Memory' ).
+
+
+*..//Approach 3: Dynamic Programming( dividing into subproblems)
+    result = climbstairs_dp( n ).
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '70. Climbing Stairs-Dynamic Programming' ).
+
+*...//Approach 4: Fibonacci Number
+    result = climbstairs_fibonacci( n ).
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '70. Climbing Stairs-Fibonacci Number' ).
+
+  ENDMETHOD.  "Climbing_Stairs
+*----------------------------------------------------------------------*
+*  Method climbstairs_recursion                                        *
+*  Leetcode Code 70. Climbing Stairs  using Recursion                  *
+*  Time Complexity O(2 Power N)
+*----------------------------------------------------------------------*
+  METHOD climbstairs_recursion.
+    IF i > num.
+      rv_res = 0.
+    ELSEIF i = num.
+      rv_res = 1.
+    ELSE.
+      rv_res = climbstairs_recursion( i = i + 1 num = num ) +
+               climbstairs_recursion( i = i + 2 num = num ).
+    ENDIF.
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method climbstairs_dp                                               *
+*  Leetcode Code 70. Climbing Stairs  using Dynamic Programming        *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD climbstairs_dp.
+*One can reach ith step in one of the two ways:
+*1. Taking a single step from (i−1)th step.
+*2. Taking a step of 2 from (i−2)th step.
+*
+*So, the total number of ways to reach ith is equal to
+*sum of ways of reaching (i−1)th step and ways of reaching (i−2)th step.
+*
+*Let dp[i] denotes the number of ways to reach on ith step:
+*
+*dp[i]=dp[i−1]+dp[i−2]
+    TYPES: tt_num TYPE TABLE OF i WITH EMPTY KEY.
+    DATA dp TYPE tt_num.
+
+    DO num + 1 TIMES.
+      APPEND 0 TO dp.
+    ENDDO.
+
+    dp[ 1 ] = 1.
+    dp[ 2 ] = 2.
+    DATA(i) = 3.
+    WHILE i <= num.
+      dp[ i ] = dp[ i - 1 ] + dp[ i - 2 ].
+      i = i + 1.
+    ENDWHILE.
+    rv_res = dp[ num ].
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method climbstairs_recursion_Memory                                 *
+*  Leetcode Code 70. Climbing Stairs  using Recursion                  *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD climbstairs_recursion_memory.
+    IF i > num.
+      rv_res = 0.
+      RETURN.
+    ENDIF.
+
+    IF i = num.
+      rv_res = 1.
+      RETURN.
+    ENDIF.
+    IF line_exists( gt_memo[ i ] ) AND gt_memo[ i ] > 0.
+      rv_res = gt_memo[ i ].
+      RETURN.
+    ENDIF.
+
+    gt_memo[ i ] =  ( climbstairs_recursion_memory( i = i + 1 num = num ) +
+                                           climbstairs_recursion_memory( i = i + 2 num = num ) ) .
+
+    rv_res = gt_memo[ i ].
+
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method climbstairs_fibonacci                                        *
+*  Leetcode Code 70. Climbing Stairs using fibonacci                   *
+*----------------------------------------------------------------------*
+  METHOD climbstairs_fibonacci.
+
+*..//Fib(n)=Fib(n−1)+Fib(n−2)
+
+    IF ( num = 1 ).
+      rv_res = 1.
+    ELSE.
+      DATA(first) = 1.
+      DATA(second) = 2.
+      DATA(i) = 3.
+      WHILE i <= num.
+        DATA(third) = first + second.
+        first = second.
+        second = third.
+        i = i + 1.
+      ENDWHILE.
+      rv_res = second.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>climbing_stairs( ).

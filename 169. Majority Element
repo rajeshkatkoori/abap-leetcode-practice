@@ -1,0 +1,95 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: majority_element .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Majority_Element                                             *
+*  Leetcode Code 169. Majority Element                                 *
+*  Time Complexity O(LogN)
+*----------------------------------------------------------------------*
+  METHOD majority_element.
+
+    TYPES: BEGIN OF ty_hash,
+             key   TYPE i,
+             value TYPE i,
+           END OF ty_hash,
+           tt_hash TYPE TABLE OF ty_hash WITH EMPTY KEY.
+
+    DATA: result  TYPE i,
+          lt_hash TYPE tt_hash.
+*    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 2 ) ( 2 ) ( 1 ) ( 1 ) ( 1 ) ( 2 ) ( 2 ) ).
+    DATA(lt_nums)  = VALUE abadr_tab_int4( ( 3 ) ( 2 ) ( 3 ) ).
+
+    DATA(len) = lines( lt_nums ).
+*...Approach 1: Brute Force
+*  Time Complexity O(N2)
+    DATA(majoritycount) = len / 2.
+
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num1>).
+      DATA(count) = 0.
+      LOOP AT  lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num2>) WHERE table_line = <lfs_num1>.
+        count += 1.
+      ENDLOOP.
+      IF count >= majoritycount.
+        result = <lfs_num1>.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '169. Majority Element -> Brute Force' ).
+
+
+*...//Approach 2: HashMap
+*  Time Complexity O(N)
+    result = 0.
+*...//Build the Hash table with count of each digit
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+
+      READ TABLE lt_hash ASSIGNING FIELD-SYMBOL(<lfs_hash>) WITH KEY key = <lfs_num>.
+      IF sy-subrc = 0.
+        <lfs_hash>-value += 1.
+      ELSE.
+        APPEND VALUE #( key = <lfs_num> value = 1 ) TO lt_hash.
+      ENDIF.
+    ENDLOOP.
+
+*...//Find the Key where Count is more than half of Array Length
+    LOOP AT lt_hash ASSIGNING <lfs_hash>.
+      IF <lfs_hash>-value >= majoritycount.
+        result = <lfs_hash>-key.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '169. Majority Element -> Hash Map' ).
+
+
+*....Approach3 Sorting
+*  Time Complexity O(NLOGN)
+    result = 0.
+    DATA(lt_temp) = lt_nums.
+    SORT lt_temp.
+    result = lt_temp[ majoritycount ].
+*...//Display the Output
+    cl_demo_output=>display( data = result   name = '169. Majority Element -> Sorting.' ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>majority_element( ).

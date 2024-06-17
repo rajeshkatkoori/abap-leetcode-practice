@@ -1,0 +1,114 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS reverse_string_array .
+
+  PRIVATE SECTION.
+    CLASS-METHODS recurseive_swap_helper
+      IMPORTING
+                lv_i     TYPE i
+                lv_j     TYPE i
+      CHANGING  ct_table TYPE STANDARD TABLE.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*   Method recurseive_string_helper                                    *
+*   Swap digits used in Reverse String Recursive Approach              *
+*   Leetcode Code 344. Reverse String                                  *
+*----------------------------------------------------------------------*
+  METHOD recurseive_swap_helper.
+
+    DATA lv_temp TYPE char1.
+
+    IF lv_i >= lv_j.
+      RETURN.
+    ENDIF.
+
+*...//Swap the Characters
+    lv_temp = ct_table[ lv_i ].
+    ct_table[ lv_i ] = ct_table[ lv_j ].
+    ct_table[ lv_j ] = lv_temp.
+
+*...Call the Recursion Swap Helper Method Again
+    recurseive_swap_helper(  EXPORTING lv_i = lv_i + 1 lv_j = lv_j - 1 CHANGING ct_table = ct_table ).
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method reverse_string_array                                         *
+*  Leetcode Code 344. Reverse String                                   *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD reverse_string_array.
+
+    DATA: lt_string TYPE TABLE OF char1,
+          lt_input  TYPE TABLE OF char1,
+          lv_temp   TYPE char1,
+          lv_string TYPE char100.
+
+    lt_input = VALUE #( ( 'h' ) ( 'e' ) ( 'l' ) ( 'l' ) ( 'o' ) ( 'j' ) ( 'i' ) ).
+    lt_string = lt_input.
+
+    DATA(len) = lines( lt_string ).
+
+*...//Approach1: Recursion - In-Place
+*  Time Complexity O(N)
+    recurseive_swap_helper(  EXPORTING lv_i = 1 lv_j = len CHANGING ct_table = lt_string ).
+*...//Display the Output
+    cl_demo_output=>display( data = lt_string name = 'Reverse string Array using Recursive apprach' ).
+
+
+*...//Approach 2: Two Pointers, Iteration, O(1) Space
+    lt_string = lt_input.
+    DATA(i) = 1.
+    DATA(j) = len.
+
+    WHILE i < j.
+*...//Swap and change the Pointers
+      lv_temp = lt_string[ i ].
+      lt_string[ i ] = lt_string[ j ].
+      lt_string[ j ] = lv_temp.
+      CLEAR lv_temp.
+      i += 1.
+      j -= 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_string name = 'Reverse String InPlace with Two Pointer Approach' ).
+
+
+***********Reverse String not Array **********
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_string ).
+    cl_demo_input=>request( ).
+
+*...//Reverse String Two-Pointer Technique - In Place
+    lv_string = lv_string.
+    i = 0.
+    j = strlen( lv_string ) - 1.
+
+    WHILE i < j.
+
+      lv_temp = lv_string+i(1).
+      lv_string+i(1) = lv_string+j(1).
+      lv_string+j(1) = lv_temp.
+
+      i += 1.
+      j -= 1.
+    ENDWHILE.
+
+    cl_demo_output=>display( data = lv_string name = 'Reverse String InPlace' ).
+
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>reverse_string_array( ).

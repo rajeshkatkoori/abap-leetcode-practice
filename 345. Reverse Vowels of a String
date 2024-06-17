@@ -1,0 +1,79 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS reverse_vowels_of_a_string .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*  Method Reverse_Vowels_of_a_String                                   *
+*  Leetcode Code 345. Reverse Vowels of a String                       *
+*  Time Complexity O(N)
+* Example 1:
+*
+* . Input: s = "hello"
+* . Output: "holle"
+* Example 2:
+*
+*  Input: s = "leetcode"
+*  Output: "leotcede"
+*----------------------------------------------------------------------*
+  METHOD reverse_vowels_of_a_string.
+
+    DATA: lt_string TYPE TABLE OF char1,
+          lt_input  TYPE TABLE OF char1,
+          lv_temp   TYPE char1,
+          lv_string TYPE char100.
+
+    CONSTANTS: c_vowels TYPE string VALUE 'aeiouAEIOU'.
+
+*..//Input for no. of consecutive elements
+    cl_demo_input=>add_field( CHANGING field = lv_string ).
+    cl_demo_input=>request( ).
+
+    DATA(len) = strlen( lv_string ).
+*...//Reverse String Two-Pointer Technique - In Place
+*...//Time complexity: O(N)
+
+    DATA(start) = 0.
+    DATA(end) = len - 1.
+
+    WHILE start < end.
+
+*...//Traverse till Non Vowels found
+*...//Find the leftmost vowel
+      WHILE start <  len AND NOT lv_string+start(1) CO c_vowels.
+        start += 1.
+      ENDWHILE.
+*...// Find the rightmost vowel
+      WHILE end >= 0 AND NOT lv_string+end(1) CO c_vowels.
+        end -= 1.
+      ENDWHILE.
+
+*...//Swap them if start is left of end
+      IF start < end.
+        lv_temp = lv_string+start(1).
+        lv_string+start(1) = lv_string+end(1).
+        lv_string+end(1) = lv_temp.
+
+        start += 1.
+        end -= 1.
+      ENDIF.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = lv_string name = 'Reverse String InPlace' ).
+
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>reverse_vowels_of_a_string( ).

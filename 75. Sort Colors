@@ -1,0 +1,76 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: dutch_sortcolors .
+
+  PRIVATE SECTION.
+    CLASS-METHODS:      swapnumbers
+      CHANGING ct_nums TYPE STANDARD TABLE
+               lv_i    TYPE i
+               lv_j    TYPE i.
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*   Method swapnumbers                                                 *
+*   Swap Numbers in an Arrary from the given indexes                   *
+* . LeetCode: 75. Sort Colors
+*----------------------------------------------------------------------*
+  METHOD swapnumbers.
+
+    DATA(lv_temp) = 0.
+
+*   swapping
+    lv_temp = ct_nums[ lv_i ].
+    ct_nums[ lv_i ] = ct_nums[ lv_j ].
+    ct_nums[ lv_j ] = lv_temp.
+
+    FREE lv_temp.
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method dutch_sortcolors                                                 *
+*  Leetcode Code 75. Sort Colors                                     *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD dutch_sortcolors.
+
+    TYPES: tyt_input TYPE TABLE OF i WITH EMPTY KEY.
+
+    DATA(lt_nums) = VALUE tyt_input( ( 2 ) ( 0 ) ( 2 ) ( 1 ) ( 1 ) ( 0 ) ).
+*    DATA(lt_nums) = VALUE tyt_input( ( 2 ) ( 0 ) ( 1 ) ).
+
+    DATA(lv_low) = 1.
+    DATA(lv_curr) = 1.
+    DATA(lv_high) = lines( lt_nums ).
+
+    WHILE lv_curr <= lv_high.
+
+      CASE lt_nums[ lv_curr ].
+        WHEN 0.
+          swapnumbers( CHANGING ct_nums = lt_nums lv_i = lv_low lv_j = lv_curr ).
+          lv_low += 1.
+          lv_curr += 1.
+        WHEN 1.
+          lv_curr += 1.
+        WHEN 2.
+          swapnumbers( CHANGING ct_nums = lt_nums lv_i = lv_curr lv_j = lv_high ).
+          lv_curr += 1.
+          lv_high -= 1.
+      ENDCASE.
+
+    ENDWHILE.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_nums   name = '75. Sort Colors' ).
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>dutch_sortcolors( ).

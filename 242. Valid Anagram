@@ -1,0 +1,109 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS: valid_anagram .
+
+  PRIVATE SECTION.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*  Method Valid_Anagram                                                 *
+*  Leetcode Code 242. Valid Anagram                                     *
+*  Time Complexity O(N)
+*----------------------------------------------------------------------*
+  METHOD valid_anagram.
+
+    DATA result TYPE string.
+
+    TYPES: BEGIN OF tyt_hash,
+             char(1) TYPE c,
+             value   TYPE i,
+           END OF tyt_hash.
+
+    TYPES: BEGIN OF tyt_dict,
+             char(1) TYPE c,
+           END OF tyt_dict.
+
+    DATA: lv_str1   TYPE string,
+          lv_str2   TYPE string,
+          lt_str1   TYPE STANDARD TABLE OF tyt_dict WITH NON-UNIQUE KEY char,
+          lt_str2   TYPE STANDARD TABLE OF tyt_dict WITH NON-UNIQUE KEY char,
+          ls_strtab TYPE tyt_hash,
+          lt_strtab TYPE HASHED TABLE OF tyt_hash WITH UNIQUE KEY char.
+
+    lv_str1 = 'anagram'.
+    lv_str2 =  'nagaram'.
+    DATA(len) = strlen( lv_str1 ).
+
+*...//Base Condition
+    IF strlen( lv_str1 ) <> strlen( lv_str2 ).
+      WRITE:/ 'Given strings are not Anagram' .
+      RETURN.
+    ENDIF.
+*...//Approach 1: Sorting
+*...Time complexity: O(nlog⁡n)
+*....Moving Stringx to Internal table, SORT and Compare
+    DO len TIMES.
+      DATA(i) = sy-index - 1.
+      APPEND lv_str1+i(1) TO lt_str1.
+      APPEND lv_str2+i(1) TO lt_str2.
+    ENDDO.
+*..Sort two Internal tables and compare
+    SORT: lt_str1, lt_str2.
+    IF lt_str1 = lt_str2.
+      WRITE:/ 'Given strings are Anagram', 'String1:', lv_str1, 'String2:', lv_str2 .
+    ELSE.
+      WRITE:/ 'Given strings are not Anagram', 'String1:', lv_str1, 'String2:', lv_str2 .
+    ENDIF.
+
+
+*..//Approach 2: Using Hash Tables
+    DO strlen( lv_str1 ) TIMES.
+      i = sy-index - 1.
+      DATA(lv_char1) = lv_str1+i(1).
+      DATA(lv_char2) = lv_str2+i(1).
+
+      READ TABLE lt_strtab ASSIGNING FIELD-SYMBOL(<lfs_strtab>) WITH KEY char = lv_char1.
+      IF sy-subrc = 0.
+        <lfs_strtab>-value += 1.
+      ELSE.
+        CLEAR ls_strtab.
+        ls_strtab-char = lv_char1.
+        ls_strtab-value = 1.
+        INSERT ls_strtab INTO TABLE lt_strtab.
+      ENDIF.
+
+*..Check if the Char in STRING2 exists and then Negate the value to -1
+      READ TABLE lt_strtab ASSIGNING <lfs_strtab> WITH KEY char = lv_char2.
+      IF sy-subrc = 0.
+        <lfs_strtab>-value -= 1.
+      ELSE.
+        CLEAR ls_strtab.
+        ls_strtab-char = lv_char2.
+        ls_strtab-value = -1.
+        INSERT ls_strtab INTO TABLE lt_strtab.
+      ENDIF.
+    ENDDO.
+
+*...//Final check if any record exits with Value <> 0
+    LOOP AT lt_strtab ASSIGNING <lfs_strtab> WHERE value > 0.
+      WRITE:/ 'Given strings are not Anagram', 'String1:', lv_str1, 'String2:', lv_str2 .
+      EXIT.
+    ENDLOOP.
+    IF sy-subrc <> 0.
+      WRITE:/ 'Given strings are Anagram', 'String1:', lv_str1, 'String2:', lv_str2 .
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>valid_anagram( ).

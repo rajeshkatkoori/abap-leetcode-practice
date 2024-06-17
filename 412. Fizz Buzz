@@ -1,0 +1,47 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+
+    CLASS-METHODS fizz_buzz .
+
+  PRIVATE SECTION.
+
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*  Method Fizz_Buzz                                                    *
+*  Leetcode Code 412. Fizz Buzz                                        *
+*----------------------------------------------------------------------*
+  METHOD fizz_buzz.
+
+    TYPES: tt_result TYPE TABLE OF char10 WITH EMPTY KEY.
+    DATA: lt_result TYPE tt_result,
+          text      TYPE char10.
+
+    DATA(num) = 15.
+
+    DATA(i) = 1.
+    WHILE i <= num.
+      text =  COND #( WHEN ( i MOD 3 = 0 ) AND ( i MOD 5 = 0 ) THEN 'FizzBuzz'
+                             WHEN ( i MOD 3 = 0 )  THEN 'Fizz'
+                             WHEN ( i MOD 5 = 0 )  THEN 'Buzz' ELSE i ).
+      APPEND text TO lt_result.
+      i = i + 1.
+    ENDWHILE.
+
+
+*...//Display the Output
+    cl_demo_output=>display( data = lt_result name = '412. Fizz Buzz' ).
+
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>fizz_buzz( ).

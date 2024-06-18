@@ -1,0 +1,84 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS valid_palindrome_ii .
+
+  PRIVATE SECTION.
+    CLASS-METHODS: check_palindrome
+      IMPORTING iv_string      TYPE string
+                iv_start       TYPE i
+                iv_end         TYPE i
+      RETURNING VALUE(rv_flag) TYPE boolean.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*  Method check_palindrome .                                                *
+*  Leetcode Code 680. Valid Palindrome II                                    *
+*----------------------------------------------------------------------*
+  METHOD check_palindrome.
+
+    DATA(i) = iv_start.
+    DATA(j) = iv_end.
+
+    WHILE ( i < j ).
+      IF  ( iv_string+i(1) <> iv_string+j(1) ).
+        rv_flag = abap_false.
+        RETURN.
+      ENDIF.
+
+      i += 1.
+      j -= 1.
+
+    ENDWHILE.
+
+    rv_flag = abap_true.
+
+
+  ENDMETHOD.
+
+*----------------------------------------------------------------------*
+*  Method Valid_Palindrome_II                                               *
+*  Leetcode Code 680. Valid Palindrome II                                    *
+*----------------------------------------------------------------------*
+  METHOD valid_palindrome_ii.
+
+    DATA lv_input TYPE string.
+
+    lv_input = 'abca'.
+
+    DATA(i) = 0.
+    DATA(j) = strlen( lv_input ) - 1.
+
+    WHILE i < j.
+
+*...// Found a mismatched pair - try both deletions
+      IF ( lv_input+i(1) <> lv_input+j(1) ).
+
+        IF ( check_palindrome( EXPORTING iv_string = lv_input  iv_start = i iv_end = j - 1 ) OR
+             check_palindrome( EXPORTING iv_string = lv_input iv_start = i + 1 iv_end = j ) ).
+          WRITE:/ lv_input, ' Can be Palindrome'.
+          RETURN.
+        ELSE.
+          WRITE:/ lv_input, ' Cannot be Palindrome'.
+          RETURN.
+        ENDIF.
+      ENDIF.
+
+
+      i += 1.
+      j -= 1.
+    ENDWHILE.
+    WRITE:/ lv_input, ' Can be Palindrome'.
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>valid_palindrome_ii( ).

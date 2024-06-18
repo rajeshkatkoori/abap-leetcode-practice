@@ -1,0 +1,175 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS group_anagrams .
+
+  PRIVATE SECTION.
+    CLASS-METHODS: sort_string
+      IMPORTING iv_string        TYPE char10
+      RETURNING VALUE(rv_string) TYPE char10,
+      get_char_key
+        IMPORTING iv_string        TYPE char10
+        RETURNING VALUE(rv_string) TYPE char60.
+
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+*----------------------------------------------------------------------*
+*  Method sort_string .                                                *
+*  Leetcode Code 49. Group Anagrams                                    *
+*----------------------------------------------------------------------*
+  METHOD sort_string.
+
+    TYPES tt_char TYPE TABLE OF char1.
+    DATA lt_char  TYPE tt_char.
+
+    DATA(len) = strlen( iv_string ).
+    DATA(i) = 0.
+
+    WHILE i < len .
+      APPEND iv_string+i(1) TO lt_char.
+      i = i + 1.
+    ENDWHILE.
+    SORT lt_char.
+    i = 1.
+    WHILE i <= len.
+      rv_string = rv_string && lt_char[ i ].
+      i = i + 1.
+    ENDWHILE.
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method get_char_key                                                 *
+*  Leetcode Code 49. Group Anagrams                                    *
+*----------------------------------------------------------------------*
+  METHOD get_char_key.
+
+    TYPES: BEGIN OF tyt_hash,
+             char(1) TYPE c,
+             value   TYPE i,
+           END OF tyt_hash.
+    DATA: lt_char_val TYPE HASHED TABLE OF tyt_hash WITH UNIQUE KEY char,
+          ls_char_val TYPE tyt_hash.
+
+*...//Populate the Hash Table with Initial value 26 chars
+    TRANSLATE sy-abcde TO LOWER CASE.
+    DATA(lv_j) = 0.
+    DO 26 TIMES.
+      ls_char_val-char = sy-abcde+lv_j(1).
+      ls_char_val-value = 0.
+      INSERT ls_char_val INTO TABLE lt_char_val.
+      CLEAR ls_char_val.
+      lv_j += 1.
+    ENDDO.
+
+    DATA(len) = strlen( iv_string ).
+    DATA(i) = 0.
+
+    WHILE i < len .
+      DATA(c) = iv_string+i(1).
+      READ TABLE lt_char_val ASSIGNING FIELD-SYMBOL(<lfs_char>) WITH KEY char = c.
+      IF sy-subrc = 0.
+        <lfs_char>-value += 1.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+
+*...Genearate the Key
+    LOOP AT lt_char_val ASSIGNING <lfs_char>.
+      rv_string = rv_string && <lfs_char>-value && '#'.
+    ENDLOOP.
+
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*  Method Group_Anagrams                                               *
+*  Leetcode Code 49. Group Anagrams                                    *
+*----------------------------------------------------------------------*
+  METHOD group_anagrams.
+
+    TYPES: tt_str TYPE TABLE OF char10 WITH EMPTY KEY.
+    TYPES: BEGIN OF ty_res,
+             gkey  TYPE string,
+             group TYPE tt_str,
+           END OF ty_res,
+           tt_res TYPE TABLE OF ty_res WITH EMPTY KEY.
+
+    DATA: lt_result TYPE tt_res,
+          lt_input  TYPE tt_str,
+          ls_result TYPE ty_res.
+
+*...//Input String Array
+    lt_input = VALUE #( ( 'eat' ) ( 'tea' ) ( 'tan' ) ( 'ate' ) ( 'nat' ) ( 'bat' ) ).
+
+*...//Approach 1: Categorize by Sorted String
+*...//Time Complexity: O(NKlog⁡K), where N is the length of strs, and Kis the maximum length of a string in strs.
+    LOOP AT lt_input ASSIGNING FIELD-SYMBOL(<lfs_input>).
+      DATA(gkey) = sort_string( <lfs_input> ).
+
+      READ TABLE lt_result ASSIGNING FIELD-SYMBOL(<lfs_result>) WITH KEY gkey = gkey.
+      IF sy-subrc = 0.
+*...//Existing Key, Add New MatchingString to group
+        APPEND <lfs_input> TO <lfs_result>-group.
+      ELSE.
+*...//New Key, Add Key and string to group
+        ls_result-gkey = gkey.
+        APPEND <lfs_input> TO ls_result-group.
+        APPEND ls_result TO lt_result.
+        CLEAR ls_result.
+      ENDIF.
+      CLEAR gkey.
+    ENDLOOP.
+
+*...//Display the Output
+    WRITE:/ 'Approach 1: Categorize by Sorted String'.
+    LOOP AT lt_result ASSIGNING <lfs_result>.
+      WRITE:/ 'Group Key: ', <lfs_result>-gkey.
+      WRITE:/ 'Group Values: '.
+      LOOP AT <lfs_result>-group ASSIGNING FIELD-SYMBOL(<lfs_group>).
+        WRITE:/ <lfs_group>.
+      ENDLOOP.
+      WRITE:/.
+    ENDLOOP.
+
+    CLEAR: lt_result, ls_result.
+
+*....//Approach 2: Categorize by Count
+*...//Time Complexity: O(NK), where N is the length of strs, and K is the maximum length of a string in strs.
+    LOOP AT lt_input ASSIGNING <lfs_input>.
+      data(cgkey) = get_char_key( <lfs_input> ).
+
+      READ TABLE lt_result ASSIGNING <lfs_result> WITH KEY gkey = cgkey.
+      IF sy-subrc = 0.
+*...//Existing Key, Add New MatchingString to group
+        APPEND <lfs_input> TO <lfs_result>-group.
+      ELSE.
+*...//New Key, Add Key and string to group
+        ls_result-gkey = cgkey.
+        APPEND <lfs_input> TO ls_result-group.
+        APPEND ls_result TO lt_result.
+        CLEAR ls_result.
+      ENDIF.
+      CLEAR cgkey.
+    ENDLOOP.
+
+*...//Display the Output
+    WRITE:/ 'Approach 2: Categorize by Count'.
+    LOOP AT lt_result ASSIGNING <lfs_result>.
+      WRITE:/ 'Group Key: ', <lfs_result>-gkey.
+      WRITE:/ 'Group Values: '.
+      LOOP AT <lfs_result>-group ASSIGNING <lfs_group>.
+        WRITE:/ <lfs_group>.
+      ENDLOOP.
+      WRITE:/.
+    ENDLOOP.
+
+    CLEAR: lt_result, ls_result.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>group_anagrams( ).

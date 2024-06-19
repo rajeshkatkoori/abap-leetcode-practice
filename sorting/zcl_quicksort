@@ -1,0 +1,81 @@
+CLASS zcl_quicksort DEFINITION
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS:
+      quicksort
+        IMPORTING iv_low   TYPE i
+                  iv_high  TYPE i
+        CHANGING
+                  iv_table TYPE abadr_tab_int4.
+    
+
+  PRIVATE SECTION.
+    CLASS-METHODS:
+      partition
+        IMPORTING iv_low       TYPE i
+                  iv_high      TYPE i
+        CHANGING
+                  iv_table     TYPE abadr_tab_int4
+        RETURNING VALUE(rv_pi) TYPE i.
+ENDCLASS.
+
+CLASS zcl_quicksort IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method partition                                                        *
+*----------------------------------------------------------------------*
+  METHOD partition.
+
+    DATA(pivot) = iv_table[ iv_high ].
+*//Index of smaller element and Indicate
+*  //the right position of pivot found so far
+    DATA(i) = iv_low - 1.
+    DATA(j) = iv_low.
+    WHILE j <= iv_high.
+*    //If current element is smaller than the pivot
+      IF ( iv_table[ j ] < pivot ).
+*      //Increment index of smaller element
+        i += 1.
+        DATA(temp) = iv_table[ j ].
+        iv_table[ j ] = iv_table[ i ].
+        iv_table[ i ] = temp.
+      ENDIF.
+
+      j = j + 1.
+    ENDWHILE.
+
+    temp = iv_table[ iv_high ].
+    iv_table[ iv_high ] = iv_table[ i + 1 ].
+    iv_table[ i + 1 ] = temp.
+    rv_pi = i + 1.
+  ENDMETHOD.
+*----------------------------------------------------------------------*
+*   Method mergesort                                                        *
+*----------------------------------------------------------------------*
+  METHOD quicksort.
+
+
+*// when low is less than high
+    IF ( iv_low < iv_high ).
+
+* // pi is the partition return index of pivot
+      DATA(pi) = partition( EXPORTING  iv_low = iv_low iv_high = iv_high CHANGING iv_table = iv_table ).
+*    //Recursion Call
+*    //smaller element than pivot goes left and
+*    //higher element goes right
+      quicksort( EXPORTING  iv_low = iv_low iv_high = pi - 1 CHANGING iv_table = iv_table ).
+      quicksort( EXPORTING  iv_low = pi + 1 iv_high = iv_high CHANGING iv_table = iv_table ).
+
+    ENDIF.
+
+  ENDMETHOD.
+ENDCLASS.
+
+START-OF-SELECTION.
+  DATA(lt_list) = VALUE abadr_tab_int4( ( 15 ) ( 2 ) ( 10 )  ( 1 ) ( 5 ) ( 3 ) ( 8 ) ( 4 ) ( 2 ) ( 13 ) ).
+  zcl_quicksort=>quicksort( EXPORTING  iv_low = 1 iv_high = lines( lt_list )  CHANGING iv_table = lt_list ).
+  cl_demo_output=>display( data =  lt_list name = 'Quick Sort' ).
+

@@ -77,8 +77,6 @@ CLASS zcl_kthlargest IMPLEMENTATION.
                CHANGING cv_table = cv_table ).
     ENDIF.
 
-*...//Display the Output
-    cl_demo_output=>display( data = rv_result[ 1 ] name = 'Kth Larget Element using HASH' ).
   ENDMETHOD.
 
 
@@ -127,7 +125,8 @@ CLASS zcl_kthlargest IMPLEMENTATION.
       heapify( EXPORTING iv_current = 1 iv_len = heapsize iv_minheap = abap_true
                CHANGING cv_table = rv_result ).
     ENDWHILE.
-
+*...//Display the Output
+    cl_demo_output=>display( data = rv_result[ 1 ] name = 'Kth Larget Element using HASH' ).
   ENDMETHOD.
 
 * <SIGNATURE>---------------------------------------------------------------------------------------+

@@ -77,6 +77,8 @@ CLASS zcl_kthlargest IMPLEMENTATION.
                CHANGING cv_table = cv_table ).
     ENDIF.
 
+*...//Display the Output
+    cl_demo_output=>display( data = rv_result[ 1 ] name = 'Kth Larget Element using HASH' ).
   ENDMETHOD.
 
 

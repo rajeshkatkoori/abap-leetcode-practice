@@ -1,0 +1,90 @@
+CLASS zcl_utility DEFINITION FINAL .
+
+  PUBLIC SECTION.
+
+    CLASS-METHODS: contains_duplicate.
+
+  PRIVATE SECTION..
+
+ENDCLASS.
+
+
+CLASS zcl_utility IMPLEMENTATION.
+
+*----------------------------------------------------------------------*
+*   Method Contains_Duplicate                                     *
+*   LetCode:217. Contains Duplicate
+*   Time Complexity: O(Nlog⁡N)
+*----------------------------------------------------------------------*
+  METHOD contains_duplicate.
+
+    DATA result TYPE boolean.
+
+    DATA(lt_input) = VALUE abadr_tab_int4( ( 4 ) ( 1 ) ( 0 ) ( 2 ) ( 10 )  ).
+
+    DATA(len) = lines( lt_input ).
+*....//Approach 1: Brute Force
+*   Time Complexity: O(N2)
+    DATA(i) = 1.
+    WHILE i <= len.
+      DATA(j) = i + 1.
+      WHILE j <= len.
+        IF lt_input[ i ] = lt_input[ j ].
+          result = abap_true.
+          EXIT.
+        ENDIF.
+        j =  j + 1.
+      ENDWHILE.
+      IF result IS NOT INITIAL.
+        EXIT.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+*...//Display the Output
+    cl_demo_output=>display( data = result name = '217. Contains Duplicate' ).
+
+
+*...//Approach 2:  SORTING
+*   Time Complexity: O(Nlog⁡N)
+    DATA(lt_nums) = lt_input.
+    SORT lt_nums.
+    i = 1.
+    CLEAR result.
+    WHILE i < len .
+      IF lt_nums[ i ] = lt_nums[ i + 1 ].
+        result = abap_true.
+        EXIT.
+      ENDIF.
+      i = i + 1.
+    ENDWHILE.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = '217. Contains Duplicate' ).
+
+
+*...//Approach 3:  Hash Set
+*   Time Complexity: O(N)
+    TYPES: tt_nums TYPE TABLE OF i WITH EMPTY KEY.
+    DATA lt_hash TYPE tt_nums.
+    lt_nums = lt_input.
+    CLEAR result.
+
+    LOOP AT lt_nums ASSIGNING FIELD-SYMBOL(<lfs_num>).
+
+      IF line_exists( lt_hash[ table_line = <lfs_num> ] ).
+        result = abap_true.
+        EXIT.
+      ENDIF.
+      APPEND <lfs_num> TO lt_hash.
+    ENDLOOP.
+
+*...//Display the Output
+    cl_demo_output=>display( data = result name = '217. Contains Duplicate' ).
+
+
+  ENDMETHOD.
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  zcl_utility=>contains_duplicate( ).
